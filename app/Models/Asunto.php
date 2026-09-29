@@ -35,4 +35,9 @@ class Asunto extends Model
     {
         return 'slug';
     }
+
+    public function intentosAcceso(): HasMany
+    {
+        return $this->hasMany(IntentoAcceso::class, 'asunto_id');
+    }
 }
