@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccesoAsuntoController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\AdjuntoController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
+
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
 
@@ -27,3 +30,38 @@ Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])
 Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
     ->middleware('asunto.desbloqueado')
     ->name('adjuntos.show');
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+
+        Route::middleware('guest')
+            ->group(function () {
+
+                Route::get(
+                    '/login',
+                    [AuthController::class, 'showLogin']
+                )
+                    ->name('login');
+
+                Route::post(
+                    '/login',
+                    [AuthController::class, 'login']
+                )
+                    ->name('login.store');
+        });
+
+        Route::middleware('auth')
+            ->group(function () {
+
+                Route::get(
+                    '/',
+                    [DashboardController::class, 'index']
+                )
+                    ->name('dashboard');
+
+                Route::post(
+                    '/logout',
+                    [AuthController::class, 'logout']
+                )
+                    ->name('logout');
+        });
+    });
