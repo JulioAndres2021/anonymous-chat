@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'ip_hash_key' => env('IP_HASH_KEY'),
+
+    'geoip_database_path' =>
+        env(
+            'GEOIP_DATABASE_PATH',
+            storage_path(
+                'app/geoip/GeoLite2-City.mmdb'
+            )
+        ),
 ];

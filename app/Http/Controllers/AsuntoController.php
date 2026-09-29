@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CrearAsuntoRequest;
 use App\Models\Asunto;
 use App\Services\AsuntoService;
+use App\Services\InformacionClienteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -36,8 +37,11 @@ class AsuntoController extends Controller
 
     public function store(CrearAsuntoRequest $request): RedirectResponse
     {
+        $cliente = app(InformacionClienteService::class)->obtener($request);
+
         $asunto = $this->asuntoService->crear(
-            $request->validated()
+            $request->validated(),
+            $cliente
         );
 
         return redirect()

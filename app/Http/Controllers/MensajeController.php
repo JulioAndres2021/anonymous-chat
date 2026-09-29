@@ -7,12 +7,14 @@ use App\Services\CifradoConversacionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Services\AdjuntoService;
+use App\Services\InformacionClienteService;
 
 class MensajeController extends Controller
 {
     public function __construct(
         private readonly CifradoConversacionService $cifradoService,
-        private readonly AdjuntoService $adjuntoService
+        private readonly AdjuntoService $adjuntoService,
+        private readonly InformacionClienteService $clienteService
     ) {}
 
     public function store(Request $request, Asunto $asunto): RedirectResponse
@@ -78,9 +80,23 @@ class MensajeController extends Controller
                 $contenido,
                 $claveConversacion
             );
+        $cliente = $this->clienteService->obtener($request);
 
         $mensaje = $asunto->mensajes()->create([
-            'contenido_cifrado' => $contenidoCifrado,
+            'contenido_cifrado' =>
+                $contenidoCifrado,
+
+            'ip_cifrada' =>
+                $cliente['ip_cifrada'],
+
+            'sistema_operativo' =>
+                $cliente['sistema_operativo'],
+
+            'navegador' =>
+                $cliente['navegador'],
+
+            'user_agent' =>
+                $cliente['user_agent'],
         ]);
 
         if ($request->hasFile('imagen')) {

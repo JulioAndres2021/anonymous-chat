@@ -14,7 +14,7 @@ class AsuntoService
     ) {
     }
 
-    public function crear(array $datos): Asunto
+    public function crear(array $datos, array $cliente): Asunto
     {
         return DB::transaction(function () use ($datos) {
 
@@ -56,7 +56,20 @@ class AsuntoService
                 );
 
             $asunto->mensajes()->create([
-                'contenido_cifrado' => $contenidoCifrado,
+                'contenido_cifrado' =>
+                    $contenidoCifrado,
+
+                'ip_cifrada' =>
+                    $cliente['ip_cifrada'] ?? null,
+
+                'sistema_operativo' =>
+                    $cliente['sistema_operativo'] ?? null,
+
+                'navegador' =>
+                    $cliente['navegador'] ?? null,
+
+                'user_agent' =>
+                    $cliente['user_agent'] ?? null,
             ]);
 
             sodium_memzero($claveConversacion);

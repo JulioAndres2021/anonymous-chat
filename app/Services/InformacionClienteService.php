@@ -4,14 +4,22 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use RuntimeException;
 
 class InformacionClienteService
 {
     public function obtener(Request $request): array
     {
         $ip = $request->ip();
-
         $userAgent = $request->userAgent();
+
+        $claveHash = config('app.ip_hash_key');
+
+        if (!$claveHash) {
+            throw new RuntimeException(
+                'IP_HASH_KEY no está configurada.'
+            );
+        }
 
         return [
             'ip_cifrada' => $ip
@@ -19,8 +27,16 @@ class InformacionClienteService
                 : null,
 
             'ip_hash' => $ip
-                ? hash('sha256', $ip)
-                : hash('sha256', 'unknown'),
+                ? hash_hmac(
+                    'sha256',
+                    $ip,
+                    $claveHash
+                )
+                : hash_hmac(
+                    'sha256',
+                    'unknown',
+                    $claveHash
+                ),
 
             'sistema_operativo' =>
                 $this->detectarSistemaOperativo($userAgent),
