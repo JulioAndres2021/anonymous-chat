@@ -8,17 +8,10 @@ use RuntimeException;
 
 class InformacionClienteService
 {
-    public function __construct(
-        private readonly GeoLocalizacionService $geoLocalizacionService
-    ) {
-    }
-
     public function obtener(Request $request): array
     {
         $ip = $request->ip();
         $userAgent = $request->userAgent();
-
-        $ubicacion = $this->geoLocalizacionService->obtener($ip);
 
         $claveHash = config('app.ip_hash_key');
 
@@ -28,8 +21,7 @@ class InformacionClienteService
             );
         }
 
-        return
-        [
+        return [
             'ip_cifrada' => $ip
                 ? Crypt::encryptString($ip)
                 : null,
@@ -53,15 +45,6 @@ class InformacionClienteService
                 $this->detectarNavegador($userAgent),
 
             'user_agent' => $userAgent,
-
-            'pais' =>
-                $ubicacion['pais'],
-
-            'provincia' =>
-                $ubicacion['provincia'],
-
-            'ciudad' =>
-                $ubicacion['ciudad'],
         ];
     }
 

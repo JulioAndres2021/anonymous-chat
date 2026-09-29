@@ -18,9 +18,6 @@ class Mensaje extends Model
         'sistema_operativo',
         'navegador',
         'user_agent',
-        'pais',
-        'provincia',
-        'ciudad',
     ];
 
     public function asunto(): BelongsTo
@@ -32,5 +29,5 @@ class Mensaje extends Model
     {
         return $this->hasMany(Adjunto::class);
     }
-    
+
 }

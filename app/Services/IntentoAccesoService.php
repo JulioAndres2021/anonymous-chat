@@ -41,15 +41,6 @@ class IntentoAccesoService
 
                 'intentos' => 0,
 
-                'pais' =>
-                    $cliente['pais'],
-
-                'provincia' =>
-                    $cliente['provincia'],
-
-                'ciudad' =>
-                    $cliente['ciudad'],
-
             ]
         );
     }
