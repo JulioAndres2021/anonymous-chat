@@ -30,4 +30,9 @@ class Asunto extends Model
     {
         return $this->hasMany(Mensaje::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

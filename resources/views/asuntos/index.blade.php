@@ -27,7 +27,9 @@
 
         <div>
             <strong>
-                {{ $asunto->titulo }}
+                <a href="{{ route('asuntos.acceso', $asunto) }}">
+                    {{ $asunto->titulo }}
+                </a>
             </strong>
 
             <br>
