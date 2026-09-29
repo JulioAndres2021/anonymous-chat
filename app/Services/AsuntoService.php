@@ -70,6 +70,15 @@ class AsuntoService
 
                 'user_agent' =>
                     $cliente['user_agent'] ?? null,
+
+                'pais' =>
+                    $cliente['pais'] ?? null,
+
+                'provincia' =>
+                    $cliente['provincia'] ?? null,
+
+                'ciudad' =>
+                    $cliente['ciudad'] ?? null,
             ]);
 
             sodium_memzero($claveConversacion);

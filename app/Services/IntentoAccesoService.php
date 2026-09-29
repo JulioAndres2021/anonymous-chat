@@ -40,6 +40,16 @@ class IntentoAccesoService
                     $cliente['user_agent'],
 
                 'intentos' => 0,
+
+                'pais' =>
+                    $cliente['pais'],
+
+                'provincia' =>
+                    $cliente['provincia'],
+
+                'ciudad' =>
+                    $cliente['ciudad'],
+
             ]
         );
     }

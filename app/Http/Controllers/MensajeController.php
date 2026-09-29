@@ -97,6 +97,16 @@ class MensajeController extends Controller
 
             'user_agent' =>
                 $cliente['user_agent'],
+
+            'pais' =>
+                $cliente['pais'],
+
+            'provincia' =>
+                $cliente['provincia'],
+
+            'ciudad' =>
+                $cliente['ciudad'],
+
         ]);
 
         if ($request->hasFile('imagen')) {
