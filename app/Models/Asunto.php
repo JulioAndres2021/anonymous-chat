@@ -40,4 +40,9 @@ class Asunto extends Model
     {
         return $this->hasMany(IntentoAcceso::class, 'asunto_id');
     }
+
+    public function mensajesConEliminados(): HasMany
+    {
+        return $this->hasMany(Mensaje::class)->withTrashed();
+    }
 }

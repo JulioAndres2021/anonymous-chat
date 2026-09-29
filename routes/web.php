@@ -7,6 +7,8 @@ use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AsuntoController as AdminAsuntoController;
+use App\Http\Controllers\Admin\IntentoAccesoController as AdminIntentoAccesoController;
 
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
@@ -63,5 +65,36 @@ Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
                     [AuthController::class, 'logout']
                 )
                     ->name('logout');
+
+                Route::get(
+                        '/asuntos',
+                        [AdminAsuntoController::class, 'index']
+                )
+                    ->name('asuntos.index');
+
+                Route::get(
+                        '/asuntos/{asunto}',
+                        [AdminAsuntoController::class, 'show']
+                )
+                    ->name('asuntos.show');
+
+                Route::get(
+                        '/papelera',
+                        [AdminAsuntoController::class, 'papelera']
+                )
+                    ->name('papelera');
+
+                Route::post(
+                        '/papelera/{id}/restaurar',
+                        [AdminAsuntoController::class, 'restaurar']
+                )
+                    ->name('papelera.restaurar');
+
+                Route::get(
+                        '/intentos',
+                        [AdminIntentoAccesoController::class, 'index']
+                )
+                    ->name('intentos.index');
+
         });
     });

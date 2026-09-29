@@ -57,6 +57,30 @@
 
     <hr>
 
+    <h2>Administración</h2>
+
+    <ul>
+        <li>
+            <a href="{{ route('admin.asuntos.index') }}">
+                Asuntos activos
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('admin.papelera') }}">
+                Papelera
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('admin.intentos.index') }}">
+                Intentos de acceso
+            </a>
+        </li>
+    </ul>
+
+    <hr>
+
     <form
         method="POST"
         action="{{ route('admin.logout') }}"
