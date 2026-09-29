@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Mensaje extends Model
 {
@@ -26,4 +27,10 @@ class Mensaje extends Model
     {
         return $this->belongsTo(Asunto::class);
     }
+
+    public function adjuntos(): HasMany
+    {
+        return $this->hasMany(Adjunto::class);
+    }
+    
 }

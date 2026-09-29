@@ -6,30 +6,46 @@ use App\Models\Asunto;
 use App\Services\CifradoConversacionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Services\AdjuntoService;
 
 class MensajeController extends Controller
 {
     public function __construct(
-        private readonly CifradoConversacionService $cifradoService
-    ) {
-    }
+        private readonly CifradoConversacionService $cifradoService,
+        private readonly AdjuntoService $adjuntoService
+    ) {}
 
-    public function store(
-        Request $request,
-        Asunto $asunto
-    ): RedirectResponse {
+    public function store(Request $request, Asunto $asunto): RedirectResponse
+    {
         $request->validate([
             'mensaje' => [
-                'required',
+                'nullable',
                 'string',
                 'max:10000',
+                'required_without:imagen',
+            ],
+
+            'imagen' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp,gif',
+                'max:5120',
             ],
         ], [
-            'mensaje.required' =>
-                'El mensaje es obligatorio.',
+            'mensaje.required_without' =>
+            'Debe escribir un mensaje o adjuntar una imagen.',
 
             'mensaje.max' =>
-                'El mensaje no puede superar los 10.000 caracteres.',
+            'El mensaje no puede superar los 10.000 caracteres.',
+
+            'imagen.image' =>
+            'El archivo debe ser una imagen válida.',
+
+            'imagen.mimes' =>
+            'La imagen debe ser JPG, JPEG, PNG, WEBP o GIF.',
+
+            'imagen.max' =>
+            'La imagen no puede superar los 5 MB.',
         ]);
 
         $claveCodificada = session()->get(
@@ -55,16 +71,25 @@ class MensajeController extends Controller
                 ->route('asuntos.acceso', $asunto);
         }
 
+        $contenido = $request->mensaje ?? '';
+
         $contenidoCifrado =
             $this->cifradoService->cifrarMensaje(
-                $request->mensaje,
+                $contenido,
                 $claveConversacion
             );
 
-        $asunto->mensajes()->create([
-            'contenido_cifrado' =>
-                $contenidoCifrado,
+        $mensaje = $asunto->mensajes()->create([
+            'contenido_cifrado' => $contenidoCifrado,
         ]);
+
+        if ($request->hasFile('imagen')) {
+            $this->adjuntoService->guardarImagen(
+                $request->file('imagen'),
+                $mensaje,
+                $claveConversacion
+            );
+        }
 
         sodium_memzero($claveConversacion);
 

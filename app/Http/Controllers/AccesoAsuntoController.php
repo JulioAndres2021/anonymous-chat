@@ -140,6 +140,7 @@ class AccesoAsuntoController extends Controller
 
         $mensajes = $asunto
             ->mensajes()
+            ->with('adjuntos')
             ->oldest()
             ->get()
             ->map(function ($mensaje) use ($claveConversacion) {
