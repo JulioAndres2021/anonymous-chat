@@ -49,6 +49,50 @@
 
     @endforelse
 
+    @if (session('success'))
+        <p>
+            {{ session('success') }}
+        </p>
+    @endif
+
+    @if ($errors->any())
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>
+                    {{ $error }}
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    <form
+        method="POST"
+        action="{{ route('mensajes.store', $asunto) }}"
+    >
+        @csrf
+
+        <div>
+            <label for="mensaje">
+                Responder
+            </label>
+
+            <br>
+
+            <textarea
+                id="mensaje"
+                name="mensaje"
+                rows="6"
+                cols="60"
+            >{{ old('mensaje') }}</textarea>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Enviar mensaje
+        </button>
+    </form>
+
     <a href="{{ route('asuntos.index') }}">
         Volver al listado
     </a>

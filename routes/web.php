@@ -3,6 +3,8 @@
 use App\Http\Controllers\AsuntoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccesoAsuntoController;
+use App\Http\Controllers\MensajeController;
+
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
 
@@ -17,3 +19,7 @@ Route::post('/a/{asunto}/unlock', [AccesoAsuntoController::class, 'unlock'])->na
 Route::get('/a/{asunto}/chat', [AccesoAsuntoController::class, 'chat'])
     ->middleware('asunto.desbloqueado')
     ->name('asuntos.chat');
+
+Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])
+    ->middleware('asunto.desbloqueado')
+    ->name('mensajes.store');
