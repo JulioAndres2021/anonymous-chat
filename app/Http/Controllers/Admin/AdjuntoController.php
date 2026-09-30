@@ -65,6 +65,12 @@ class AdjuntoController extends Controller
 
                 'Cache-Control' =>
                     'private, no-store, no-cache',
+
+                'Pragma' =>
+                    'no-cache',
+
+                'Expires' =>
+                    '0',
             ]
         );
     }

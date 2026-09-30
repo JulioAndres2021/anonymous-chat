@@ -106,7 +106,28 @@ class AppServiceProvider extends ServiceProvider
             'admin-login',
             function (Request $request) {
                 return Limit::perMinute(5)
-                    ->by($request->ip());
+                    ->by($request->ip())
+                    ->response(
+                        function (
+                            Request $request,
+                            array $headers
+                        ) {
+                            return redirect()
+                                ->route('admin.login')
+                                ->withErrors([
+                                    'email' =>
+                                        __(
+                                            'messages.too_many_login_attempts'
+                                        ),
+                                ])
+                                ->withInput(
+                                    $request->only('email')
+                                )
+                                ->withHeaders(
+                                    $headers
+                                );
+                        }
+                    );
             }
         );
 

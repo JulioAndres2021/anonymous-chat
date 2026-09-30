@@ -87,4 +87,34 @@ class AdminAuthTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_logout_conserva_idioma_seleccionado(): void
+    {
+        $user = User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@test.com',
+            'password' =>
+                Hash::make('Admin1234!'),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession([
+                'locale' => 'en',
+            ]);
+
+        $response = $this->post(
+            route('admin.logout')
+        );
+
+        $response->assertRedirect(
+            route('asuntos.index')
+        );
+
+        $this->assertGuest();
+
+        $this->assertSame(
+            'en',
+            session('locale')
+        );
+    }
 }

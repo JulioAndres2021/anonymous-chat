@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Services\AdjuntoService;
 use App\Services\InformacionClienteService;
+use Illuminate\Validation\Rules\File;
 
 class MensajeController extends Controller
 {
@@ -29,9 +30,16 @@ class MensajeController extends Controller
 
             'imagen' => [
                 'nullable',
-                'image',
-                'mimes:jpg,jpeg,png,webp,gif',
-                'max:5120',
+
+                File::image()
+                    ->types([
+                        'jpg',
+                        'jpeg',
+                        'png',
+                        'webp',
+                        'gif',
+                    ])
+                    ->max('5mb'),
             ],
         ], [
             'mensaje.required_without' =>

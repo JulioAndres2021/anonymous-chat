@@ -12,14 +12,41 @@ use RuntimeException;
 
 class AdjuntoService
 {
-    public function guardarImagen(
-        UploadedFile $archivo,
-        Mensaje $mensaje,
-        string $claveConversacion
-    ): Adjunto {
+    public function guardarImagen(UploadedFile $archivo, Mensaje $mensaje, string $claveConversacion): Adjunto 
+    {
         $contenido = file_get_contents(
             $archivo->getRealPath()
         );
+
+        $mime = $archivo->getMimeType();
+
+        $mimesPermitidos = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+        ];
+
+        if (
+            !$mime ||
+            !in_array(
+                $mime,
+                $mimesPermitidos,
+                true
+            )
+        ) {
+            throw new RuntimeException(
+                'Tipo de imagen no permitido.'
+            );
+        }
+
+        $infoImagen = @getimagesize($archivo->getRealPath());
+
+        if ($infoImagen === false) {
+            throw new RuntimeException(
+                'El archivo no contiene una imagen válida.'
+            );
+        }
 
         if ($contenido === false) {
             throw new RuntimeException(
@@ -43,6 +70,18 @@ class AdjuntoService
             'ciphertext' => base64_encode($contenidoCifrado),
         ], JSON_THROW_ON_ERROR);
 
+        $tamano = $archivo->getSize();
+
+        if (
+            $tamano === false ||
+            $tamano <= 0 ||
+            $tamano > 5 * 1024 * 1024
+        ) {
+            throw new RuntimeException(
+                'El tamaño de la imagen no es válido.'
+            );
+        }
+
         $nombreArchivo = Str::uuid()->toString() . '.enc';
 
         $ruta = 'anonymous-chat/' . $nombreArchivo;
@@ -60,12 +99,9 @@ class AdjuntoService
 
             'ruta' => $ruta,
 
-            'mime' =>
-                $archivo->getMimeType()
-                ?? 'application/octet-stream',
+            'mime' => $mime,
 
-            'tamano' =>
-                $archivo->getSize(),
+            'tamano' => $tamano,
         ]);
     }
 

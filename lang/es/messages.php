@@ -98,4 +98,6 @@ return [
     'blocked_until' => 'bloqueado_hasta',
     'access_records' => 'registros_acceso',
     'title' => 'título',
+    'too_many_login_attempts' =>
+    'Demasiados intentos de acceso. Esperá un minuto antes de volver a intentarlo.',
 ];

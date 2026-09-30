@@ -86,4 +86,152 @@ class AdjuntoTest extends TestCase
 
         sodium_memzero($clave);
     }
+
+    public function test_no_permite_archivo_que_no_es_imagen(): void
+    {
+        $service =
+            app(
+                CifradoConversacionService::class
+            );
+
+        $password = 'password123';
+
+        $clave =
+            $service->generarClaveConversacion();
+
+        $asunto = Asunto::create([
+            'titulo' =>
+                'Archivo Invalido',
+
+            'slug' =>
+                'archivo-invalido',
+
+            'password_hash' =>
+                Hash::make($password),
+
+            'clave_password_cifrada' =>
+                $service
+                    ->protegerClaveConPassword(
+                        $clave,
+                        $password
+                    ),
+
+            'clave_admin_cifrada' => null,
+
+            'expira_at' =>
+                now()->addDay(),
+        ]);
+
+        $this->withSession([
+            "asuntos_desbloqueados.{$asunto->id}"
+                => base64_encode($clave),
+        ]);
+
+        $archivo =
+            UploadedFile::fake()
+                ->create(
+                    'malicioso.txt',
+                    10,
+                    'text/plain'
+                );
+
+        $response = $this->post(
+            route(
+                'mensajes.store',
+                $asunto
+            ),
+            [
+                'mensaje' =>
+                    'Archivo inválido',
+
+                'imagen' =>
+                    $archivo,
+            ]
+        );
+
+        $response->assertSessionHasErrors(
+            'imagen'
+        );
+
+        $this->assertDatabaseCount(
+            'adjuntos',
+            0
+        );
+
+        sodium_memzero($clave);
+    }
+
+    public function test_no_permite_imagen_superior_a_cinco_mb(): void
+    {
+        $service =
+            app(
+                CifradoConversacionService::class
+            );
+
+        $password = 'password123';
+
+        $clave =
+            $service->generarClaveConversacion();
+
+        $asunto = Asunto::create([
+            'titulo' =>
+                'Imagen Grande',
+
+            'slug' =>
+                'imagen-grande',
+
+            'password_hash' =>
+                Hash::make($password),
+
+            'clave_password_cifrada' =>
+                $service
+                    ->protegerClaveConPassword(
+                        $clave,
+                        $password
+                    ),
+
+            'clave_admin_cifrada' => null,
+
+            'expira_at' =>
+                now()->addDay(),
+        ]);
+
+        $this->withSession([
+            "asuntos_desbloqueados.{$asunto->id}"
+                => base64_encode($clave),
+        ]);
+
+        $archivo =
+            UploadedFile::fake()
+                ->create(
+                    'grande.jpg',
+                    6000,
+                    'image/jpeg'
+                );
+
+        $response = $this->post(
+            route(
+                'mensajes.store',
+                $asunto
+            ),
+            [
+                'mensaje' =>
+                    'Imagen demasiado grande',
+
+                'imagen' =>
+                    $archivo,
+            ]
+        );
+
+        $response->assertSessionHasErrors(
+            'imagen'
+        );
+
+        $this->assertDatabaseCount(
+            'adjuntos',
+            0
+        );
+
+        sodium_memzero($clave);
+    }
 }

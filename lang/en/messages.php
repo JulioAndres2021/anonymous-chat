@@ -98,4 +98,8 @@ return [
     'blocked_until' => 'blocked_until',
     'access_records' => 'access_records',
     'title' => 'title',
+    'too_many_login_attempts' =>
+    'Too many login attempts. Wait one minute before trying again.',
+    'thread_created_success' =>
+    "Thread ':title' was created successfully.",
 ];

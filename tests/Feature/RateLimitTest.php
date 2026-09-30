@@ -32,6 +32,12 @@ class RateLimitTest extends TestCase
             ]
         );
 
-        $response->assertStatus(429);
+        $response->assertRedirect(
+            route('admin.login')
+        );
+
+        $response->assertSessionHasErrors(
+            'email'
+        );
     }
 }

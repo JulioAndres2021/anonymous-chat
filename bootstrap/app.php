@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\AsuntoDesbloqueado;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SecurityHeaders;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
         $middleware->alias([
             'asunto.desbloqueado' => AsuntoDesbloqueado::class,
         ]);
@@ -29,6 +31,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup(
             'web',
             SetLocale::class
+        );
+
+        $middleware->appendToGroup(
+            'web',
+            SecurityHeaders::class
         );
 
     })

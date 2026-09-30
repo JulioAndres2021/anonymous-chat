@@ -47,11 +47,16 @@ class AsuntoController extends Controller
         );
 
         return redirect()
-            ->route('asuntos.index')
-            ->with(
-                'success',
-                "El asunto '{$asunto->titulo}' fue creado correctamente."
-            );
+        ->route('asuntos.index')
+        ->with(
+            'success',
+            __(
+                'messages.thread_created_success',
+                [
+                    'title' => $asunto->titulo,
+                ]
+            )
+        );
     }
 
     public function buscar(Request $request): JsonResponse
