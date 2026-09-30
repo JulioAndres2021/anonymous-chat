@@ -123,15 +123,6 @@ root@anonymous-chat:/admin#
 
 <div class="line"></div>
 
-<form
-    method="POST"
-    action="{{ route('admin.logout') }}"
->
-    @csrf
 
-    <button type="submit">
-        logout
-    </button>
-</form>
 
 @endsection

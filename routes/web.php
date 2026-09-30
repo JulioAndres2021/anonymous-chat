@@ -15,6 +15,8 @@ Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
 
 Route::get('/crear', [AsuntoController::class, 'create'])->name('asuntos.create');
 
+Route::get('/buscar-asuntos', [AsuntoController::class, 'buscar'])->name('asuntos.buscar');
+
 Route::post('/asuntos', [AsuntoController::class, 'store'])->name('asuntos.store');
 
 Route::get('/a/{asunto}', [AccesoAsuntoController::class, 'show'])->name('asuntos.acceso');
@@ -32,6 +34,7 @@ Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])
 Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
     ->middleware('asunto.desbloqueado')
     ->name('adjuntos.show');
+Route::get('/asuntos/sugerencias', [AsuntoController::class, 'sugerencias'])->name('asuntos.sugerencias');
 
     Route::prefix('admin')->name('admin.')->group(function () {
 

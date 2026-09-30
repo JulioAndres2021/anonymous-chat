@@ -22,6 +22,16 @@ anonymous@chat:~/{{ $asunto->slug }}$
     [ UNLOCKED ]
 </p>
 
+<p class="muted">
+    Podés leer la conversación, responder
+    o adjuntar una imagen.
+</p>
+
+<p class="muted">
+    Las respuestas se almacenan cifradas
+    dentro de este asunto.
+</p>
+
 <div class="line"></div>
 
 @forelse ($mensajes as $mensaje)

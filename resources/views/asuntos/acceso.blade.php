@@ -31,6 +31,11 @@ anonymous@chat:~/{{ $asunto->slug }}$
     [ LOCKED ] password required
 </p>
 
+<p class="muted">
+    Para leer o responder esta conversación
+    necesitás la contraseña definida por
+    quien creó el asunto.
+</p>
 <form
     method="POST"
     action="{{ route(

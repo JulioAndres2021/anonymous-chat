@@ -249,7 +249,56 @@
     </div>
 
     <main class="terminal-body">
+        @if (
+    request()->routeIs('admin.*')
+    && auth()->check()
+)
 
+    <div class="nav">
+
+        <a href="{{ route('admin.dashboard') }}">
+            [ dashboard ]
+        </a>
+
+        <a href="{{ route('admin.asuntos.index') }}">
+            [ asuntos ]
+        </a>
+
+        <a href="{{ route('admin.papelera') }}">
+            [ papelera ]
+        </a>
+
+        <a href="{{ route('admin.intentos.index') }}">
+            [ seguridad ]
+        </a>
+
+        <form
+            method="POST"
+            action="{{ route('admin.logout') }}"
+            style="display:inline;"
+        >
+
+            @csrf
+
+            <button
+                type="submit"
+                style="
+                    padding:0;
+                    border:0;
+                    background:transparent;
+                    color:#ff5f56;
+                "
+            >
+                [ SALIR ]
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="line"></div>
+
+@endif
         @if (session('success'))
             <p class="success">
                 [ OK ] {{ session('success') }}

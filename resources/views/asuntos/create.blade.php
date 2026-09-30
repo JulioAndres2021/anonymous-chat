@@ -19,7 +19,38 @@ anonymous@chat:~$ new-thread
 </p>
 
 <div class="line"></div>
+<div class="message">
 
+    <p class="success">
+        [ NEW THREAD ]
+    </p>
+
+    <p class="muted">
+        Creá un asunto único para iniciar
+        una conversación.
+    </p>
+
+    <p class="muted">
+        La contraseña será necesaria para
+        que otros usuarios puedan abrirla.
+        No podrá recuperarse si la olvidás.
+    </p>
+
+    <p class="muted">
+        El contenido de los mensajes y los
+        archivos adjuntos se almacenan
+        cifrados.
+    </p>
+
+    <p class="warning">
+        Cuando llegue la fecha de expiración,
+        el asunto dejará de estar disponible
+        públicamente.
+    </p>
+
+</div>
+
+<div class="line"></div>
 <form
     action="{{ route('asuntos.store') }}"
     method="POST"
@@ -39,6 +70,10 @@ anonymous@chat:~$ new-thread
             autocomplete="off"
             autofocus
         >
+        <div
+            id="titulo-sugerencias"
+            style="margin-top:10px;"
+        ></div>
     </div>
 
     <div class="field">
@@ -105,3 +140,152 @@ anonymous@chat:~$ new-thread
 </a>
 
 @endsection
+
+@push('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const input =
+        document.getElementById('titulo');
+
+    const contenedor =
+        document.getElementById(
+            'titulo-sugerencias'
+        );
+
+    let timeout = null;
+
+    input.addEventListener('input', () => {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(
+            comprobar,
+            400
+        );
+
+    });
+
+    async function comprobar() {
+
+        const titulo =
+            input.value.trim();
+
+        if (titulo.length < 3) {
+            contenedor.innerHTML = '';
+            return;
+        }
+
+        const url =
+            `{{ route('asuntos.sugerencias') }}` +
+            `?titulo=${encodeURIComponent(titulo)}`;
+
+        try {
+
+            const response =
+                await fetch(url, {
+                    headers: {
+                        'Accept':
+                            'application/json'
+                    }
+                });
+
+            const data =
+                await response.json();
+
+            if (!data.existe) {
+
+                contenedor.innerHTML = `
+                    <span class="success">
+                        [ AVAILABLE ]
+                        Nombre disponible.
+                    </span>
+                `;
+
+                return;
+            }
+
+            let html = `
+                <div class="warning">
+                    [ EXISTS ]
+                    Ese asunto ya existe.
+                </div>
+
+                <div class="muted">
+                    suggestions:
+                </div>
+            `;
+
+            data.sugerencias.forEach(
+                sugerencia => {
+
+                    html += `
+                        <button
+                            type="button"
+                            class="titulo-sugerido"
+                            data-titulo="${escapar(
+                                sugerencia
+                            )}"
+                            style="
+                                margin-top:6px;
+                                margin-right:6px;
+                            "
+                        >
+                            ${escapar(
+                                sugerencia
+                            )}
+                        </button>
+                    `;
+                }
+            );
+
+            contenedor.innerHTML = html;
+
+            document
+                .querySelectorAll(
+                    '.titulo-sugerido'
+                )
+                .forEach(boton => {
+
+                    boton.addEventListener(
+                        'click',
+                        () => {
+
+                            input.value =
+                                boton.dataset.titulo;
+
+                            contenedor.innerHTML = `
+                                <span class="success">
+                                    [ SELECTED ]
+                                    ${escapar(
+                                        boton.dataset.titulo
+                                    )}
+                                </span>
+                            `;
+                        }
+                    );
+
+                });
+
+        } catch {
+
+            contenedor.innerHTML = '';
+        }
+    }
+
+    function escapar(texto) {
+
+        const div =
+            document.createElement('div');
+
+        div.textContent =
+            texto;
+
+        return div.innerHTML;
+    }
+
+});
+</script>
+
+@endpush

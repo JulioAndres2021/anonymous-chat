@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\CifradoConversacionService;
 use Throwable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AsuntoController extends Controller
 {
@@ -150,4 +152,6 @@ class AsuntoController extends Controller
                 'Asunto restaurado correctamente.'
             );
     }
+
+    
 }
