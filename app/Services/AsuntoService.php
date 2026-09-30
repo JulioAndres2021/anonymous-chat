@@ -27,6 +27,13 @@ class AsuntoService
                     $datos['password']
                 );
 
+            $claveAdminCifrada =
+                $this->cifradoService
+                    ->protegerClaveParaAdmin(
+                        $claveConversacion
+            );
+
+
             $asunto = Asunto::create([
                 'titulo' => trim($datos['titulo']),
 
@@ -44,7 +51,7 @@ class AsuntoService
                  * Más adelante la misma clave de conversación
                  * también quedará protegida para el administrador.
                  */
-                'clave_admin_cifrada' => null,
+                'clave_admin_cifrada' => $claveAdminCifrada,
 
                 'expira_at' => $datos['expira_at'],
             ]);

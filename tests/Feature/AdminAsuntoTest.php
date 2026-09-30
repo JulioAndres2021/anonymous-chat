@@ -74,4 +74,78 @@ class AdminAsuntoTest extends TestCase
             $asunto->expira_at->isFuture()
         );
     }
+
+    public function test_admin_puede_ver_mensaje_descifrado(): void
+    {
+        config()->set(
+            'app.anonymous_admin_key',
+            base64_encode(
+                random_bytes(
+                    SODIUM_CRYPTO_SECRETBOX_KEYBYTES
+                )
+            )
+        );
+
+        $admin = User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@test.com',
+            'password' =>
+                Hash::make('Admin1234!'),
+        ]);
+
+        $service =
+            app(CifradoConversacionService::class);
+
+        $password = 'password123';
+
+        $clave =
+            $service->generarClaveConversacion();
+
+        $asunto = Asunto::create([
+            'titulo' => 'Asunto Admin',
+            'slug' => 'asunto-admin',
+
+            'password_hash' =>
+                Hash::make($password),
+
+            'clave_password_cifrada' =>
+                $service->protegerClaveConPassword(
+                    $clave,
+                    $password
+                ),
+
+            'clave_admin_cifrada' =>
+                $service->protegerClaveParaAdmin(
+                    $clave
+                ),
+
+            'expira_at' =>
+                now()->addDay(),
+        ]);
+
+        $asunto->mensajes()->create([
+            'contenido_cifrado' =>
+                $service->cifrarMensaje(
+                    'Mensaje visible para admin',
+                    $clave
+                ),
+        ]);
+
+        sodium_memzero($clave);
+
+        $this->actingAs($admin);
+
+        $response = $this->get(
+            route(
+                'admin.asuntos.show',
+                $asunto
+            )
+        );
+
+        $response->assertOk();
+
+        $response->assertSee(
+            'Mensaje visible para admin'
+        );
+    }
 }

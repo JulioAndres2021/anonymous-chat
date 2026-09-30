@@ -6,9 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Asunto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use App\Services\CifradoConversacionService;
+use Throwable;
 
 class AsuntoController extends Controller
 {
+    public function __construct(
+        private readonly CifradoConversacionService $cifradoService
+    ) {
+    }
+
     public function index(): View
     {
         $asuntos = Asunto::query()
@@ -24,9 +31,8 @@ class AsuntoController extends Controller
         );
     }
 
-    public function show(
-        Asunto $asunto
-    ): View {
+    public function show(Asunto $asunto): View
+    {
         $asunto->loadCount([
             'mensajes',
             'intentosAcceso',
@@ -37,9 +43,57 @@ class AsuntoController extends Controller
             'intentosAcceso',
         ]);
 
+        $mensajesDescifrados = collect();
+
+        $errorDescifrado = null;
+
+        if (!$asunto->clave_admin_cifrada) {
+
+            $errorDescifrado =
+                'Este asunto no tiene clave administrativa disponible.';
+
+        } else {
+
+            try {
+
+                $claveConversacion =
+                    $this->cifradoService
+                        ->recuperarClaveComoAdmin(
+                            $asunto->clave_admin_cifrada
+                        );
+
+                $mensajesDescifrados =
+                    $asunto->mensajes
+                        ->map(function ($mensaje) use ($claveConversacion) {
+
+                            $mensaje->contenido_descifrado =
+                                $this->cifradoService
+                                    ->descifrarMensaje(
+                                        $mensaje->contenido_cifrado,
+                                        $claveConversacion
+                                    );
+
+                            return $mensaje;
+                        });
+
+                sodium_memzero(
+                    $claveConversacion
+                );
+
+            } catch (Throwable $e) {
+
+                $errorDescifrado =
+                    'No fue posible descifrar la conversación.';
+            }
+        }
+
         return view(
             'admin.asuntos.show',
-            compact('asunto')
+            compact(
+                'asunto',
+                'mensajesDescifrados',
+                'errorDescifrado'
+            )
         );
     }
 

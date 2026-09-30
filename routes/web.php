@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AsuntoController as AdminAsuntoController;
 use App\Http\Controllers\Admin\IntentoAccesoController as AdminIntentoAccesoController;
-
+use App\Http\Controllers\Admin\AdjuntoController as AdminAdjuntoController;
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
 
@@ -95,6 +95,10 @@ Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
                         [AdminIntentoAccesoController::class, 'index']
                 )
                     ->name('intentos.index');
+
+                Route::get('/adjuntos/{adjunto}', [AdminAdjuntoController::class, 'show']
+)
+                    ->name('adjuntos.show');
 
         });
     });

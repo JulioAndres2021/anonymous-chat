@@ -180,4 +180,113 @@ class CifradoConversacionService
 
         return $mensaje;
     }
+
+    public function protegerClaveParaAdmin(string $claveConversacion): string
+    {
+        $claveAdmin = $this->obtenerClaveAdmin();
+
+        $nonce = random_bytes(
+            SODIUM_CRYPTO_SECRETBOX_NONCEBYTES
+        );
+
+        $cifrado = sodium_crypto_secretbox(
+            $claveConversacion,
+            $nonce,
+            $claveAdmin
+        );
+
+        return json_encode([
+            'version' => self::VERSION,
+            'nonce' => base64_encode($nonce),
+            'ciphertext' => base64_encode($cifrado),
+        ], JSON_THROW_ON_ERROR);
+    }
+
+    public function recuperarClaveComoAdmin(string $payload): string
+    {
+        $datos = json_decode(
+            $payload,
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        if (
+            !isset(
+                $datos['version'],
+                $datos['nonce'],
+                $datos['ciphertext']
+            )
+        ) {
+            throw new RuntimeException(
+                'El formato de la clave administrativa no es válido.'
+            );
+        }
+
+        $nonce = base64_decode(
+            $datos['nonce'],
+            true
+        );
+
+        $cifrado = base64_decode(
+            $datos['ciphertext'],
+            true
+        );
+
+        if (
+            $nonce === false ||
+            $cifrado === false
+        ) {
+            throw new RuntimeException(
+                'No fue posible interpretar la clave administrativa.'
+            );
+        }
+
+        $claveAdmin = $this->obtenerClaveAdmin();
+
+        $claveConversacion =
+            sodium_crypto_secretbox_open(
+                $cifrado,
+                $nonce,
+                $claveAdmin
+            );
+
+        if ($claveConversacion === false) {
+            throw new RuntimeException(
+                'No fue posible recuperar la clave de conversación.'
+            );
+        }
+
+        return $claveConversacion;
+    }
+
+    private function obtenerClaveAdmin(): string
+    {
+        $claveBase64 =
+            config('app.anonymous_admin_key');
+
+        if (!$claveBase64) {
+            throw new RuntimeException(
+                'ANONYMOUS_ADMIN_KEY no está configurada.'
+            );
+        }
+
+        $clave = base64_decode(
+            $claveBase64,
+            true
+        );
+
+        if (
+            $clave === false ||
+            strlen($clave) !==
+                SODIUM_CRYPTO_SECRETBOX_KEYBYTES
+        ) {
+            throw new RuntimeException(
+                'ANONYMOUS_ADMIN_KEY no tiene un formato válido.'
+            );
+        }
+
+        return $clave;
+    }
+
 }

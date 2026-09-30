@@ -125,5 +125,6 @@ return [
 
     'ip_hash_key' => env('IP_HASH_KEY'),
 
-    
+    'anonymous_admin_key' => env('ANONYMOUS_ADMIN_KEY'),
+
 ];

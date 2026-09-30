@@ -91,11 +91,84 @@
 
             <br>
 
-            Contenido:
+            <h2>
+                Mensajes
+            </h2>
 
-            <strong>
-                CIFRADO
-            </strong>
+            @if ($errorDescifrado)
+
+                <p>
+                    {{ $errorDescifrado }}
+                </p>
+
+            @else
+
+                @forelse ($mensajesDescifrados as $mensaje)
+
+                    <div>
+
+                        <strong>
+                            Mensaje #{{ $mensaje->id }}
+                        </strong>
+
+                        <br><br>
+
+                        {{ $mensaje->contenido_descifrado }}
+
+                        <br><br>
+
+                        Fecha:
+                        {{ $mensaje->created_at->format('d/m/Y H:i') }}
+
+                        <br>
+
+                        SO:
+                        {{ $mensaje->sistema_operativo ?? '-' }}
+
+                        <br>
+
+                        Navegador:
+                        {{ $mensaje->navegador ?? '-' }}
+
+                        <br>
+
+                        Adjuntos:
+                        {{ $mensaje->adjuntos->count() }}
+
+                        @if ($mensaje->adjuntos->isNotEmpty())
+
+                            @foreach ($mensaje->adjuntos as $adjunto)
+
+                                <p>
+                                    <a
+                                        href="{{ route(
+                                            'admin.adjuntos.show',
+                                            $adjunto
+                                        ) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        [ IMAGEN ]
+                                    </a>
+                                </p>
+
+                            @endforeach
+
+                        @endif
+
+                    </div>
+
+                    <hr>
+
+                @empty
+
+                    <p>
+                        No hay mensajes.
+                    </p>
+
+                @endforelse
+
+            @endif
 
         </div>
 

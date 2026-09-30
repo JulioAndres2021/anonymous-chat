@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Services\CifradoConversacionService;
-use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Tests\TestCase;
 
 class CifradoConversacionServiceTest extends TestCase
 {
@@ -71,6 +71,47 @@ class CifradoConversacionServiceTest extends TestCase
         $service->recuperarClaveConPassword(
             $claveProtegida,
             'password-incorrecta'
+        );
+    }
+
+    public function test_admin_puede_recuperar_clave_de_conversacion(): void
+    {
+        config()->set(
+            'app.anonymous_admin_key',
+            base64_encode(
+                random_bytes(
+                    SODIUM_CRYPTO_SECRETBOX_KEYBYTES
+                )
+            )
+        );
+
+        $service =
+            new CifradoConversacionService();
+
+        $claveOriginal =
+            $service->generarClaveConversacion();
+
+        $claveProtegida =
+            $service->protegerClaveParaAdmin(
+                $claveOriginal
+            );
+
+        $claveRecuperada =
+            $service->recuperarClaveComoAdmin(
+                $claveProtegida
+            );
+
+        $this->assertSame(
+            $claveOriginal,
+            $claveRecuperada
+        );
+
+        sodium_memzero(
+            $claveOriginal
+        );
+
+        sodium_memzero(
+            $claveRecuperada
         );
     }
 }
