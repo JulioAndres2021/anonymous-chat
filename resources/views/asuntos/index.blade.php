@@ -1,52 +1,70 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.terminal')
 
-    <title>Anonymous Chat</title>
-</head>
+@section('title', 'Anonymous Chat')
 
-<body>
+@section('terminal-title')
+anonymous@chat:~$ ls asuntos
+@endsection
 
-    <h1>ANONYMOUS-CHAT</h1>
+@section('content')
 
-    <a href="{{ route('asuntos.create') }}">
-        Crear asunto
+<div class="nav">
+    <a
+        href="{{ route('asuntos.create') }}"
+        class="terminal-button"
+    >
+        + CREAR ASUNTO
     </a>
+</div>
 
-    @if (session('success'))
-        <p>
-            {{ session('success') }}
-        </p>
-    @endif
+<p>
+    <span class="prompt">
+        anonymous@chat:~$
+    </span>
 
-    <hr>
+    <span class="command">
+        ls asuntos
+    </span>
+</p>
+
+<div class="line"></div>
+
+<ul class="terminal-list">
 
     @forelse ($asuntos as $asunto)
 
-        <div>
-            <strong>
-                <a href="{{ route('asuntos.acceso', $asunto) }}">
-                    {{ $asunto->titulo }}
-                </a>
-            </strong>
+        <li>
 
-            <br>
+            <a
+                href="{{ route(
+                    'asuntos.acceso',
+                    $asunto
+                ) }}"
+            >
+                {{ $asunto->titulo }}
+            </a>
 
-            Expira:
-            {{ optional($asunto->expira_at)->format('d/m/Y H:i') }}
-        </div>
+            <span class="muted">
+                · expira
+                {{ optional(
+                    $asunto->expira_at
+                )->format('d/m/Y H:i') }}
+            </span>
 
-        <hr>
+        </li>
 
     @empty
 
-        <p>No hay asuntos disponibles.</p>
+        <li class="muted">
+            No hay asuntos disponibles.
+        </li>
 
     @endforelse
 
-    {{ $asuntos->links() }}
+</ul>
 
-</body>
-</html>
+<div class="pagination">
+    {{ $asuntos->links() }}
+</div>
+
+@endsection

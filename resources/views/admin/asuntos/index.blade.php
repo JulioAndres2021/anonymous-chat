@@ -1,74 +1,84 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@extends('layouts.terminal')
 
-    <title>Asuntos - Admin</title>
-</head>
+@section('title', 'Admin - Asuntos')
 
-<body>
+@section('terminal-title')
+root@anonymous-chat:/admin/asuntos#
+@endsection
 
-    <h1>
-        Asuntos activos
-    </h1>
+@section('prompt')
+root@anonymous-chat:/admin/asuntos#
+@endsection
 
-    <p>
-        <a href="{{ route('admin.dashboard') }}">
-            Volver al dashboard
-        </a>
-    </p>
+@section('content')
 
-    <hr>
+<div class="nav">
+
+    <a href="{{ route('admin.dashboard') }}">
+        [ dashboard ]
+    </a>
+
+    <a href="{{ route('admin.papelera') }}">
+        [ trash ]
+    </a>
+
+    <a href="{{ route('admin.intentos.index') }}">
+        [ failed_access ]
+    </a>
+
+</div>
+
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin/asuntos#
+    </span>
+
+    <span class="command">
+        ls -la
+    </span>
+</p>
+
+<div class="line"></div>
+
+<ul class="terminal-list">
 
     @forelse ($asuntos as $asunto)
 
-        <div>
+        <li>
 
-            <strong>
+            <a
+                href="{{ route(
+                    'admin.asuntos.show',
+                    $asunto
+                ) }}"
+            >
                 {{ $asunto->titulo }}
-            </strong>
-
-            <br>
-
-            Slug:
-            {{ $asunto->slug }}
-
-            <br>
-
-            Mensajes:
-            {{ $asunto->mensajes_count }}
-
-            <br>
-
-            Expira:
-            {{ optional($asunto->expira_at)->format('d/m/Y H:i') }}
-
-            <br><br>
-
-            <a href="{{ route(
-                'admin.asuntos.show',
-                $asunto
-            ) }}">
-                Ver detalle
             </a>
 
-        </div>
+            <div class="muted">
+                slug={{ $asunto->slug }}
+                |
+                messages={{ $asunto->mensajes_count }}
+                |
+                expires={{
+                    optional(
+                        $asunto->expira_at
+                    )->format('d/m/Y H:i')
+                }}
+            </div>
 
-        <hr>
+        </li>
 
     @empty
 
-        <p>
-            No hay asuntos activos.
-        </p>
+        <li class="muted">
+            No active threads.
+        </li>
 
     @endforelse
 
-    {{ $asuntos->links() }}
+</ul>
 
-</body>
-</html>
+{{ $asuntos->links() }}
+
+@endsection

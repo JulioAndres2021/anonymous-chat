@@ -1,107 +1,107 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', 'Admin - Failed Access')
 
-    <title>
-        Intentos de acceso
-    </title>
-</head>
+@section('terminal-title')
+root@anonymous-chat:/admin/security#
+@endsection
 
-<body>
+@section('prompt')
+root@anonymous-chat:/admin/security#
+@endsection
 
-    <h1>
-        Intentos de acceso
-    </h1>
+@section('content')
 
-    <p>
-        <a href="{{ route('admin.dashboard') }}">
-            Volver al dashboard
-        </a>
-    </p>
+<div class="nav">
 
-    <hr>
+    <a href="{{ route('admin.dashboard') }}">
+        [ dashboard ]
+    </a>
 
-    @forelse ($intentos as $intento)
+    <a href="{{ route('admin.asuntos.index') }}">
+        [ active_threads ]
+    </a>
+
+</div>
+
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin/security#
+    </span>
+
+    <span class="command">
+        cat failed_access.log
+    </span>
+</p>
+
+<div class="line"></div>
+
+@forelse ($intentos as $intento)
+
+    <article class="message">
 
         <div>
-
-            <strong>
-                Asunto:
-            </strong>
-
-            {{ $intento->asunto?->titulo ?? 'Asunto no disponible' }}
-
-            <br>
-
-            <strong>
-                IP:
-            </strong>
-
-            {{ $intento->ip_descifrada ?? '-' }}
-
-            <br>
-
-            <strong>
-                SO:
-            </strong>
-
-            {{ $intento->sistema_operativo ?? '-' }}
-
-            <br>
-
-            <strong>
-                Navegador:
-            </strong>
-
-            {{ $intento->navegador ?? '-' }}
-
-            <br>
-
-            <strong>
-                Intentos:
-            </strong>
-
-            {{ $intento->intentos }}
-
-            <br>
-
-            <strong>
-                Último intento:
-            </strong>
-
-            {{ optional(
-                $intento->ultimo_intento_at
-            )->format('d/m/Y H:i') }}
-
-            <br>
-
-            <strong>
-                Bloqueado hasta:
-            </strong>
-
-            {{ optional(
-                $intento->bloqueado_hasta
-            )->format('d/m/Y H:i') ?? '-' }}
-
+            thread={{
+                $intento->asunto?->titulo
+                ?? 'unknown'
+            }}
         </div>
 
-        <hr>
+        <div>
+            ip={{
+                $intento->ip_descifrada
+                ?? 'unknown'
+            }}
+        </div>
 
-    @empty
+        <div>
+            os={{
+                $intento->sistema_operativo
+                ?? 'unknown'
+            }}
+        </div>
 
-        <p>
-            No hay intentos fallidos registrados.
-        </p>
+        <div>
+            browser={{
+                $intento->navegador
+                ?? 'unknown'
+            }}
+        </div>
 
-    @endforelse
+        <div>
+            attempts={{ $intento->intentos }}
+        </div>
 
-    {{ $intentos->links() }}
+        <div>
+            last_attempt={{
+                optional(
+                    $intento->ultimo_intento_at
+                )->format('d/m/Y H:i:s')
+                ?? '-'
+            }}
+        </div>
 
-</body>
-</html>
+        <div>
+            blocked_until={{
+                optional(
+                    $intento->bloqueado_hasta
+                )->format('d/m/Y H:i:s')
+                ?? '-'
+            }}
+        </div>
+
+    </article>
+
+    <div class="line"></div>
+
+@empty
+
+    <p class="success">
+        [ OK ] No failed access attempts.
+    </p>
+
+@endforelse
+
+{{ $intentos->links() }}
+
+@endsection

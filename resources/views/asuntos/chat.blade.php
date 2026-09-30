@@ -1,140 +1,138 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', $asunto->titulo)
 
-    <title>
-        {{ $asunto->titulo }}
-    </title>
-</head>
+@section('terminal-title')
+anonymous@chat:~/{{ $asunto->slug }}$
+@endsection
 
-<body>
+@section('content')
 
-    <h1>
-        {{ $asunto->titulo }}
-    </h1>
+<p>
+    <span class="prompt">
+        anonymous@chat:~/{{ $asunto->slug }}$
+    </span>
 
-    <p>
-        Conversación desbloqueada.
+    <span class="command">
+        cat conversation.log
+    </span>
+</p>
+
+<p class="success">
+    [ UNLOCKED ]
+</p>
+
+<div class="line"></div>
+
+@forelse ($mensajes as $mensaje)
+
+    <article class="message">
+
+        <div class="message-content">
+            {{ $mensaje->contenido_descifrado }}
+        </div>
+
+        @if ($mensaje->adjuntos->isNotEmpty())
+
+            @foreach ($mensaje->adjuntos as $adjunto)
+
+                <div style="margin-top: 10px;">
+
+                    <a
+                        href="{{ route(
+                            'adjuntos.show',
+                            [$asunto, $adjunto]
+                        ) }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        [ IMAGEN ]
+                    </a>
+
+                </div>
+
+            @endforeach
+
+        @endif
+
+        <div class="message-meta">
+            timestamp:
+            {{ $mensaje->created_at->format(
+                'd/m/Y H:i:s'
+            ) }}
+        </div>
+
+    </article>
+
+    <div class="line"></div>
+
+@empty
+
+    <p class="muted">
+        conversation.log está vacío.
     </p>
 
-    <hr>
+@endforelse
 
-    @forelse ($mensajes as $mensaje)
+<p>
+    <span class="prompt">
+        anonymous@chat:~/{{ $asunto->slug }}$
+    </span>
 
-        <div>
+    <span class="command">
+        reply
+    </span>
+</p>
 
-            <p>
-                {{ $mensaje->contenido_descifrado }}
-            </p>
+<form
+    method="POST"
+    action="{{ route(
+        'mensajes.store',
+        $asunto
+    ) }}"
+    enctype="multipart/form-data"
+>
+    @csrf
 
-            @if ($mensaje->adjuntos->isNotEmpty())
+    <div class="field">
 
-                @foreach ($mensaje->adjuntos as $adjunto)
+        <label for="mensaje">
+            message:
+        </label>
 
-                    <p>
-                        <a
-                            href="{{ route(
-                                'adjuntos.show',
-                                [$asunto, $adjunto]
-                            ) }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            [ IMAGEN ]
-                        </a>
-                    </p>
+        <textarea
+            id="mensaje"
+            name="mensaje"
+            rows="7"
+        >{{ old('mensaje') }}</textarea>
 
-                @endforeach
+    </div>
 
-            @endif
+    <div class="field">
 
-            <small>
-                {{ $mensaje->created_at->format('d/m/Y H:i') }}
-            </small>
+        <label for="imagen">
+            attach_image:
+        </label>
 
-        </div>
+        <input
+            id="imagen"
+            type="file"
+            name="imagen"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+        >
 
-        <hr>
+    </div>
 
-    @empty
+    <button type="submit">
+        ./send
+    </button>
 
-        <p>
-            No hay mensajes.
-        </p>
+</form>
 
-    @endforelse
+<div class="line"></div>
 
-    @if (session('success'))
-        <p>
-            {{ session('success') }}
-        </p>
-    @endif
+<a href="{{ route('asuntos.index') }}">
+    ← cd /asuntos
+</a>
 
-    @if ($errors->any())
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                </li>
-            @endforeach
-        </ul>
-    @endif
-
-    <form
-        method="POST"
-        action="{{ route('mensajes.store', $asunto) }}"
-        enctype="multipart/form-data"
-    >
-        @csrf
-
-        <div>
-            <label for="mensaje">
-                Responder
-            </label>
-
-            <br>
-
-            <textarea
-                id="mensaje"
-                name="mensaje"
-                rows="6"
-                cols="60"
-            >{{ old('mensaje') }}</textarea>
-
-            <br>
-
-            <div>
-                <label for="imagen">
-                    Adjuntar imagen
-                </label>
-
-                <br>
-
-                <input
-                    id="imagen"
-                    type="file"
-                    name="imagen"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                >
-            </div>
-        </div>
-
-        <br>
-
-        <button type="submit">
-            Enviar mensaje
-        </button>
-    </form>
-
-    <a href="{{ route('asuntos.index') }}">
-        Volver al listado
-    </a>
-
-</body>
-</html>
+@endsection

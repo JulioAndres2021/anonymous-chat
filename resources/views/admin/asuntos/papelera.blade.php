@@ -1,57 +1,65 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', 'Admin - Papelera')
 
-    <title>Papelera - Admin</title>
-</head>
+@section('terminal-title')
+root@anonymous-chat:/admin/trash#
+@endsection
 
-<body>
+@section('prompt')
+root@anonymous-chat:/admin/trash#
+@endsection
 
-    <h1>
-        Papelera
-    </h1>
+@section('content')
 
-    <p>
-        <a href="{{ route('admin.dashboard') }}">
-            Volver al dashboard
-        </a>
-    </p>
+<div class="nav">
 
-    @if (session('success'))
+    <a href="{{ route('admin.dashboard') }}">
+        [ dashboard ]
+    </a>
 
-        <p>
-            {{ session('success') }}
-        </p>
+    <a href="{{ route('admin.asuntos.index') }}">
+        [ active_threads ]
+    </a>
 
-    @endif
+</div>
 
-    <hr>
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin/trash#
+    </span>
+
+    <span class="command">
+        ls --deleted
+    </span>
+</p>
+
+<div class="line"></div>
+
+<ul class="terminal-list">
 
     @forelse ($asuntos as $asunto)
 
-        <div>
+        <li>
 
             <strong>
                 {{ $asunto->titulo }}
             </strong>
 
-            <br>
+            <div class="muted">
+                deleted={{
+                    optional(
+                        $asunto->deleted_at
+                    )->format('d/m/Y H:i:s')
+                }}
 
-            Eliminado:
-            {{ optional($asunto->deleted_at)->format('d/m/Y H:i') }}
+                |
 
-            <br>
-
-            Mensajes:
-            {{ $asunto->mensajes_con_eliminados_count }}
-
-            <br><br>
+                messages={{
+                    $asunto
+                        ->mensajes_con_eliminados_count
+                }}
+            </div>
 
             <form
                 method="POST"
@@ -59,29 +67,29 @@
                     'admin.papelera.restaurar',
                     $asunto->id
                 ) }}"
+                style="margin-top:10px;"
             >
 
                 @csrf
 
                 <button type="submit">
-                    Restaurar
+                    restore
                 </button>
 
             </form>
 
-        </div>
-
-        <hr>
+        </li>
 
     @empty
 
-        <p>
-            La papelera está vacía.
-        </p>
+        <li class="muted">
+            trash vacío.
+        </li>
 
     @endforelse
 
-    {{ $asuntos->links() }}
+</ul>
 
-</body>
-</html>
+{{ $asuntos->links() }}
+
+@endsection

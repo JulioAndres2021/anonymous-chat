@@ -1,95 +1,90 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', 'Admin Login')
 
-    <title>
-        Admin - Anonymous Chat
-    </title>
-</head>
+@section('terminal-title')
+root@anonymous-chat:/admin# login
+@endsection
 
-<body>
+@section('prompt')
+root@anonymous-chat:/admin#
+@endsection
 
-    <h1>
-        Anonymous Chat / Admin
-    </h1>
+@section('content')
 
-    @if ($errors->any())
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin#
+    </span>
 
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                </li>
-            @endforeach
-        </ul>
+    <span class="command">
+        authenticate
+    </span>
+</p>
 
-    @endif
+<div class="line"></div>
 
-    <form
-        method="POST"
-        action="{{ route('admin.login.store') }}"
-    >
+<p class="warning">
+    RESTRICTED AREA
+</p>
 
-        @csrf
+<form
+    method="POST"
+    action="{{ route('admin.login.store') }}"
+>
+    @csrf
 
-        <div>
-            <label for="email">
-                Email
-            </label>
+    <div class="field">
 
-            <br>
+        <label for="email">
+            user:
+        </label>
+
+        <input
+            id="email"
+            type="email"
+            name="email"
+            value="{{ old('email') }}"
+            autofocus
+        >
+
+    </div>
+
+    <div class="field">
+
+        <label for="password">
+            password:
+        </label>
+
+        <input
+            id="password"
+            type="password"
+            name="password"
+        >
+
+    </div>
+
+    <div class="field">
+
+        <label>
 
             <input
-                id="email"
-                type="email"
-                name="email"
-                value="{{ old('email') }}"
+                type="checkbox"
+                name="remember"
+                value="1"
+                style="width:auto;"
             >
-        </div>
 
-        <br>
+            remember_session
 
-        <div>
-            <label for="password">
-                Password
-            </label>
+        </label>
 
-            <br>
+    </div>
 
-            <input
-                id="password"
-                type="password"
-                name="password"
-            >
-        </div>
+    <button type="submit">
+        login
+    </button>
 
-        <br>
+</form>
 
-        <div>
-            <label>
-                <input
-                    type="checkbox"
-                    name="remember"
-                    value="1"
-                >
-
-                Recordarme
-            </label>
-        </div>
-
-        <br>
-
-        <button type="submit">
-            Entrar
-        </button>
-
-    </form>
-
-</body>
-</html>
+@endsection

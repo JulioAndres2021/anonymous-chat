@@ -1,98 +1,137 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', 'Admin Dashboard')
 
-    <title>
-        Dashboard - Anonymous Chat
-    </title>
-</head>
+@section('terminal-title')
+root@anonymous-chat:/admin# dashboard
+@endsection
 
-<body>
+@section('prompt')
+root@anonymous-chat:/admin#
+@endsection
 
-    <h1>
-        Administración
-    </h1>
+@section('content')
 
-    <p>
-        Bienvenido,
-        {{ auth()->user()->name }}
-    </p>
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin#
+    </span>
 
-    <hr>
+    <span class="command">
+        status
+    </span>
+</p>
 
-    <ul>
+<p class="success">
+    authenticated:
+    {{ auth()->user()->name }}
+</p>
 
-        <li>
-            Asuntos activos:
+<div class="stats">
+
+    <div class="stat">
+        <div class="stat-value">
             {{ $estadisticas['asuntos_activos'] }}
-        </li>
+        </div>
 
-        <li>
-            Asuntos eliminados:
+        <div class="stat-label">
+            ACTIVE THREADS
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-value">
             {{ $estadisticas['asuntos_eliminados'] }}
-        </li>
+        </div>
 
-        <li>
-            Mensajes:
+        <div class="stat-label">
+            TRASHED THREADS
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-value">
             {{ $estadisticas['mensajes'] }}
-        </li>
+        </div>
 
-        <li>
-            Adjuntos:
+        <div class="stat-label">
+            MESSAGES
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-value">
             {{ $estadisticas['adjuntos'] }}
-        </li>
+        </div>
 
-        <li>
-            Intentos fallidos:
+        <div class="stat-label">
+            ATTACHMENTS
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-value">
             {{ $estadisticas['intentos_fallidos'] }}
-        </li>
+        </div>
 
-    </ul>
+        <div class="stat-label">
+            FAILED ACCESS
+        </div>
+    </div>
 
-    <hr>
+</div>
 
-    <h2>Administración</h2>
+<div class="line"></div>
 
-    <ul>
-        <li>
-            <a href="{{ route('admin.asuntos.index') }}">
-                Asuntos activos
-            </a>
-        </li>
+<p>
+    <span class="prompt">
+        root@anonymous-chat:/admin#
+    </span>
 
-        <li>
-            <a href="{{ route('admin.papelera') }}">
-                Papelera
-            </a>
-        </li>
+    <span class="command">
+        ls modules
+    </span>
+</p>
 
-        <li>
-            <a href="{{ route('admin.intentos.index') }}">
-                Intentos de acceso
-            </a>
-        </li>
-    </ul>
+<ul class="terminal-list">
 
-    <hr>
+    <li>
+        <a href="{{ route(
+            'admin.asuntos.index'
+        ) }}">
+            active_threads
+        </a>
+    </li>
 
-    <form
-        method="POST"
-        action="{{ route('admin.logout') }}"
-    >
+    <li>
+        <a href="{{ route(
+            'admin.papelera'
+        ) }}">
+            trash
+        </a>
+    </li>
 
-        @csrf
+    <li>
+        <a href="{{ route(
+            'admin.intentos.index'
+        ) }}">
+            failed_access
+        </a>
+    </li>
 
-        <button type="submit">
-            Cerrar sesión
-        </button>
+</ul>
 
-    </form>
+<div class="line"></div>
 
-</body>
-</html>
+<form
+    method="POST"
+    action="{{ route('admin.logout') }}"
+>
+    @csrf
+
+    <button type="submit">
+        logout
+    </button>
+</form>
+
+@endsection

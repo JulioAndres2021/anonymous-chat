@@ -1,124 +1,107 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.terminal')
 
-    <title>Crear asunto</title>
-</head>
+@section('title', 'Crear asunto')
 
-<body>
+@section('terminal-title')
+anonymous@chat:~$ new-thread
+@endsection
 
-    <h1>Crear asunto</h1>
+@section('content')
 
-    @if ($errors->any())
+<p>
+    <span class="prompt">
+        anonymous@chat:~$
+    </span>
 
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                </li>
-            @endforeach
-        </ul>
+    <span class="command">
+        create --anonymous
+    </span>
+</p>
 
-    @endif
+<div class="line"></div>
 
-    <form
-        action="{{ route('asuntos.store') }}"
-        method="POST"
-    >
+<form
+    action="{{ route('asuntos.store') }}"
+    method="POST"
+>
+    @csrf
 
-        @csrf
+    <div class="field">
+        <label for="titulo">
+            asunto:
+        </label>
 
-        <div>
-            <label>
-                Asunto
-            </label>
+        <input
+            id="titulo"
+            type="text"
+            name="titulo"
+            value="{{ old('titulo') }}"
+            autocomplete="off"
+            autofocus
+        >
+    </div>
 
-            <br>
+    <div class="field">
+        <label for="password">
+            password:
+        </label>
 
-            <input
-                type="text"
-                name="titulo"
-                value="{{ old('titulo') }}"
-            >
-        </div>
+        <input
+            id="password"
+            type="password"
+            name="password"
+            autocomplete="new-password"
+        >
+    </div>
 
-        <br>
+    <div class="field">
+        <label for="password_confirmation">
+            repeat_password:
+        </label>
 
-        <div>
-            <label>
-                Contraseña
-            </label>
+        <input
+            id="password_confirmation"
+            type="password"
+            name="password_confirmation"
+            autocomplete="new-password"
+        >
+    </div>
 
-            <br>
+    <div class="field">
+        <label for="expira_at">
+            expires_at:
+        </label>
 
-            <input
-                type="password"
-                name="password"
-            >
-        </div>
+        <input
+            id="expira_at"
+            type="datetime-local"
+            name="expira_at"
+            value="{{ old('expira_at') }}"
+        >
+    </div>
 
-        <br>
+    <div class="field">
+        <label for="mensaje">
+            message:
+        </label>
 
-        <div>
-            <label>
-                Repetir contraseña
-            </label>
+        <textarea
+            id="mensaje"
+            name="mensaje"
+            rows="9"
+        >{{ old('mensaje') }}</textarea>
+    </div>
 
-            <br>
+    <button type="submit">
+        ./create-thread
+    </button>
 
-            <input
-                type="password"
-                name="password_confirmation"
-            >
-        </div>
+</form>
 
-        <br>
+<div class="line"></div>
 
-        <div>
-            <label>
-                Fecha de expiración
-            </label>
+<a href="{{ route('asuntos.index') }}">
+    ← volver
+</a>
 
-            <br>
-
-            <input
-                type="datetime-local"
-                name="expira_at"
-                value="{{ old('expira_at') }}"
-            >
-        </div>
-
-        <br>
-
-        <div>
-            <label>
-                Mensaje
-            </label>
-
-            <br>
-
-            <textarea
-                name="mensaje"
-                rows="8"
-                cols="60"
-            >{{ old('mensaje') }}</textarea>
-        </div>
-
-        <br>
-
-        <button type="submit">
-            Crear asunto
-        </button>
-
-    </form>
-
-    <br>
-
-    <a href="{{ route('asuntos.index') }}">
-        Volver
-    </a>
-
-</body>
-</html>
+@endsection

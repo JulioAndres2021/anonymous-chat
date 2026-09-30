@@ -1,77 +1,70 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+@extends('layouts.terminal')
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+@section('title', $asunto->titulo)
 
-    <title>
-        Acceso - {{ $asunto->titulo }}
-    </title>
-</head>
+@section('terminal-title')
+anonymous@chat:~/{{ $asunto->slug }}$
+@endsection
 
-<body>
+@section('content')
 
-    <h1>
+<p>
+    <span class="prompt">
+        anonymous@chat:~/{{ $asunto->slug }}$
+    </span>
+
+    <span class="command">
+        unlock
+    </span>
+</p>
+
+<div class="line"></div>
+
+<p>
+    THREAD:
+    <strong>
         {{ $asunto->titulo }}
-    </h1>
+    </strong>
+</p>
 
-    <p>
-        Este asunto está protegido.
-    </p>
+<p class="warning">
+    [ LOCKED ] password required
+</p>
 
-    @if ($errors->any())
+<form
+    method="POST"
+    action="{{ route(
+        'asuntos.unlock',
+        $asunto
+    ) }}"
+>
+    @csrf
 
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                </li>
-            @endforeach
-        </ul>
+    <div class="field">
 
-    @endif
+        <label for="password">
+            password:
+        </label>
 
-    <form
-        method="POST"
-        action="{{ route('asuntos.unlock', $asunto) }}"
-    >
+        <input
+            id="password"
+            type="password"
+            name="password"
+            autofocus
+        >
 
-        @csrf
+    </div>
 
-        <div>
+    <button type="submit">
+        unlock
+    </button>
 
-            <label for="password">
-                Contraseña
-            </label>
+</form>
 
-            <br>
+<div class="line"></div>
 
-            <input
-                id="password"
-                type="password"
-                name="password"
-                autofocus
-            >
+<a href="{{ route('asuntos.index') }}">
+    ← cd ..
+</a>
 
-        </div>
-
-        <br>
-
-        <button type="submit">
-            Desbloquear
-        </button>
-
-    </form>
-
-    <br>
-
-    <a href="{{ route('asuntos.index') }}">
-        Volver
-    </a>
-
-</body>
-</html>
+@endsection
