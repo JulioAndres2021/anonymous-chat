@@ -13,6 +13,27 @@ use App\Http\Controllers\Admin\AdjuntoController as AdminAdjuntoController;
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
 
+//Ruta para cambiar IDIOMAS
+Route::get(
+    '/idioma/{locale}',
+    function (string $locale) {
+
+        if (!in_array(
+            $locale,
+            ['es', 'en'],
+            true
+        )) {
+            abort(404);
+        }
+
+        session([
+            'locale' => $locale,
+        ]);
+
+        return back();
+    }
+)->name('locale.change');
+
 Route::get('/crear', [AsuntoController::class, 'create'])->name('asuntos.create');
 
 Route::get('/buscar-asuntos', [AsuntoController::class, 'buscar'])->name('asuntos.buscar');
@@ -26,7 +47,6 @@ Route::get('/a/{asunto}/chat', [AccesoAsuntoController::class, 'chat'])->middlew
 Route::post('/a/{asunto}/lock', [AccesoAsuntoController::class, 'lock'])->middleware('asunto.desbloqueado')->name('asuntos.lock');
 
 Route::post('/a/{asunto}/unlock', [AccesoAsuntoController::class, 'unlock'])->name('asuntos.unlock');
-
 
 
 Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])

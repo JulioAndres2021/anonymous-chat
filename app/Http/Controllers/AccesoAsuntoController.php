@@ -4,26 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Asunto;
 use App\Services\CifradoConversacionService;
+use App\Services\IntentoAccesoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
-use App\Services\IntentoAccesoService;
 
 class AccesoAsuntoController extends Controller
 {
     public function __construct(
-    private readonly CifradoConversacionService $cifradoService,
-    private readonly IntentoAccesoService $intentoAccesoService
-) {
-}
+        private readonly CifradoConversacionService $cifradoService,
+        private readonly IntentoAccesoService $intentoAccesoService
+    ) {
+    }
 
     public function show(Asunto $asunto): View
     {
         return view('asuntos.acceso', compact('asunto'));
     }
 
-   public function unlock(Request $request, Asunto $asunto): RedirectResponse
+    public function unlock(Request $request, Asunto $asunto): RedirectResponse
     {
         $request->validate([
             'password' => [
@@ -31,76 +31,50 @@ class AccesoAsuntoController extends Controller
                 'string',
             ],
         ], [
-            'password.required' =>
-                'La contraseña es obligatoria.',
+            'password.required' => __('messages.password_required_error'),
         ]);
 
-        $registro =
-            $this->intentoAccesoService->obtenerRegistro(
-                $asunto,
-                $request
-            );
+        $registro = $this->intentoAccesoService->obtenerRegistro(
+            $asunto,
+            $request
+        );
 
-        if (
-            $this->intentoAccesoService
-                ->estaBloqueado($registro)
-        ) {
-            return back()
-                ->withErrors([
-                    'password' =>
-                        'Demasiados intentos fallidos. Intente nuevamente más tarde.',
-                ]);
+        if ($this->intentoAccesoService->estaBloqueado($registro)) {
+            return back()->withErrors([
+                'password' => __('messages.too_many_attempts'),
+            ]);
         }
 
-        if (
-            !Hash::check(
-                $request->password,
-                $asunto->password_hash
-            )
-        ) {
-            $registro =
-                $this->intentoAccesoService
-                    ->registrarFallo($registro);
+        if (!Hash::check($request->password, $asunto->password_hash)) {
+            $registro = $this->intentoAccesoService->registrarFallo($registro);
 
-            if (
-                $this->intentoAccesoService
-                    ->estaBloqueado($registro)
-            ) {
-                return back()
-                    ->withErrors([
-                        'password' =>
-                            'Se alcanzó el máximo de intentos. Acceso bloqueado temporalmente.',
-                    ]);
+            if ($this->intentoAccesoService->estaBloqueado($registro)) {
+                return back()->withErrors([
+                    'password' => __('messages.max_attempts_reached'),
+                ]);
             }
 
-            $restantes =
-                $this->intentoAccesoService
-                    ->intentosRestantes($registro);
+            $restantes = $this->intentoAccesoService->intentosRestantes($registro);
 
-            return back()
-                ->withErrors([
-                    'password' =>
-                        "Contraseña incorrecta. Intentos restantes: {$restantes}.",
-                ]);
+            return back()->withErrors([
+                'password' => __('messages.wrong_password_remaining', [
+                    'remaining' => $restantes,
+                ]),
+            ]);
         }
 
         try {
-            $claveConversacion =
-                $this->cifradoService
-                    ->recuperarClaveConPassword(
-                        $asunto->clave_password_cifrada,
-                        $request->password
-                    );
+            $claveConversacion = $this->cifradoService->recuperarClaveConPassword(
+                $asunto->clave_password_cifrada,
+                $request->password
+            );
         } catch (\Throwable $e) {
-            return back()
-                ->withErrors([
-                    'password' =>
-                        'No fue posible desbloquear la conversación.',
-                ]);
+            return back()->withErrors([
+                'password' => __('messages.unlock_failed'),
+            ]);
         }
 
-        $this->intentoAccesoService
-            ->limpiarIntentos($registro);
+        $this->intentoAccesoService->limpiarIntentos($registro);
 
         session()->put(
             "asuntos_desbloqueados.{$asunto->id}",
@@ -109,8 +83,7 @@ class AccesoAsuntoController extends Controller
 
         sodium_memzero($claveConversacion);
 
-        return redirect()
-            ->route('asuntos.chat', $asunto);
+        return redirect()->route('asuntos.chat', $asunto);
     }
 
     public function chat(Asunto $asunto): View|RedirectResponse
@@ -120,22 +93,17 @@ class AccesoAsuntoController extends Controller
         );
 
         if (!$claveCodificada) {
-            return redirect()
-                ->route('asuntos.acceso', $asunto);
+            return redirect()->route('asuntos.acceso', $asunto);
         }
 
-        $claveConversacion = base64_decode(
-            $claveCodificada,
-            true
-        );
+        $claveConversacion = base64_decode($claveCodificada, true);
 
         if ($claveConversacion === false) {
             session()->forget(
                 "asuntos_desbloqueados.{$asunto->id}"
             );
 
-            return redirect()
-                ->route('asuntos.acceso', $asunto);
+            return redirect()->route('asuntos.acceso', $asunto);
         }
 
         $mensajes = $asunto
@@ -144,7 +112,6 @@ class AccesoAsuntoController extends Controller
             ->oldest()
             ->get()
             ->map(function ($mensaje) use ($claveConversacion) {
-
                 $mensaje->contenido_descifrado =
                     $this->cifradoService->descifrarMensaje(
                         $mensaje->contenido_cifrado,
@@ -162,7 +129,7 @@ class AccesoAsuntoController extends Controller
         );
     }
 
-    public function lock(Request $request, Asunto $asunto): RedirectResponse 
+    public function lock(Request $request, Asunto $asunto): RedirectResponse
     {
         $request->session()->forget(
             "asuntos_desbloqueados.{$asunto->id}"
@@ -172,7 +139,7 @@ class AccesoAsuntoController extends Controller
             ->route('asuntos.acceso', $asunto)
             ->with(
                 'success',
-                'Conversación bloqueada correctamente.'
+                __('messages.thread_locked_success')
             );
     }
 }

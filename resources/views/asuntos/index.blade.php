@@ -7,145 +7,71 @@ anonymous@chat:~$ ls asuntos
 @endsection
 
 @section('terminal-image')
-
-<img
-    src="{{ asset(
-        'images/anonymous-chat.png'
-    ) }}"
-    alt="Anonymous Chat"
->
-
+<img src="{{ asset('images/anonymous-chat.png') }}" alt="Anonymous Chat">
 @endsection
+
 @section('content')
 
 <div class="nav">
-    <a
-        href="{{ route('asuntos.create') }}"
-        class="terminal-button"
-    >
-        + CREAR ASUNTO
+    <a href="{{ route('asuntos.create') }}" class="terminal-button">
+        + {{ __('messages.create_thread') }}
     </a>
 </div>
 
 <div class="message">
-
-    <p class="success">
-        [ ANONYMOUS-CHAT ]
-    </p>
-
-    <p>
-        Sistema de conversaciones privadas
-        sin registro de usuario.
-    </p>
-
-    <p class="muted">
-        Podés buscar un asunto existente y,
-        si conocés su contraseña, acceder a
-        la conversación.
-    </p>
-
-    <p class="muted">
-        También podés crear un nuevo asunto,
-        definir una contraseña y una fecha
-        de expiración, escribir mensajes y
-        adjuntar imágenes.
-    </p>
-
-    <p class="warning">
-        [ PRIVACY ]
-        El sistema registra datos técnicos
-        mínimos de seguridad, como IP,
-        navegador y sistema operativo.
-    </p>
-
-    <p class="warning">
-        No compartas la contraseña del asunto
-        con personas que no deban acceder a
-        la conversación.
-    </p>
-
+    <p class="success">[ {{ __('messages.app_name') }} ]</p>
+    <p>{{ __('messages.home_title') }}</p>
+    <p class="muted">{{ __('messages.home_search_help') }}</p>
+    <p class="muted">{{ __('messages.home_create_help') }}</p>
+    <p class="warning">[ {{ __('messages.privacy') }} ] {{ __('messages.privacy_notice') }}</p>
+    <p class="muted">{{ __('messages.password_warning') }}</p>
 </div>
 
 <div class="line"></div>
 
 <div class="field">
-    <label for="buscar-asunto">
-        search:
-    </label>
-
+    <label for="buscar-asunto">{{ __('messages.search') }}:</label>
     <input
         id="buscar-asunto"
         type="text"
-        placeholder="Escriba para buscar..."
+        placeholder="{{ __('messages.search_placeholder') }}"
         autocomplete="off"
     >
 </div>
 
-<p
-    id="search-status"
-    class="muted"
->
-    Mostrando asuntos disponibles.
-</p>
+<p id="search-status" class="muted">{{ __('messages.showing_threads') }}</p>
 
 <div class="line"></div>
 
 <p>
-    <span class="prompt">
-        anonymous@chat:~$
-    </span>
-
-    <span class="command">
-        ls asuntos
-    </span>
+    <span class="prompt">anonymous@chat:~$</span>
+    <span class="command">ls asuntos</span>
 </p>
 
 <div class="line"></div>
 
-<ul
-    id="lista-asuntos"
-    class="terminal-list"
->
-
+<ul id="lista-asuntos" class="terminal-list">
     @forelse ($asuntos as $asunto)
-
         <li>
-
-            <a
-                href="{{ route(
-                    'asuntos.acceso',
-                    $asunto
-                ) }}"
-            >
+            <a href="{{ route('asuntos.acceso', $asunto) }}">
                 {{ $asunto->titulo }}
             </a>
 
             <span class="muted">
-                · expira
-                {{ optional(
-                    $asunto->expira_at
-                )->format('d/m/Y H:i') }}
+                · {{ __('messages.expires') }}
+                {{ optional($asunto->expira_at)->format('d/m/Y H:i') }}
             </span>
 
             @if ($asunto->expira_at)
-
                 <span class="warning">
-                    · restante:
+                    · {{ __('messages.remaining') }}:
                     {{ $asunto->expira_at->diffForHumans() }}
                 </span>
-
             @endif
-
         </li>
-
     @empty
-
-        <li class="muted">
-            No hay asuntos disponibles.
-        </li>
-
+        <li class="muted">{{ __('messages.no_threads') }}</li>
     @endforelse
-
 </ul>
 
 <div class="pagination">
@@ -155,138 +81,86 @@ anonymous@chat:~$ ls asuntos
 @endsection
 
 @push('scripts')
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const textos = {
+        mostrando: @json(__('messages.showing_threads')),
+        sinResultados: @json(__('messages.no_results')),
+        resultados: @json(__('messages.results')),
+        error: @json(__('messages.search_error')),
+        expira: @json(__('messages.expires')),
+    };
 
-    const input =
-        document.getElementById('buscar-asunto');
-
-    const lista =
-        document.getElementById('lista-asuntos');
-
-    const estado =
-        document.getElementById('search-status');
-
-    const listadoOriginal =
-        lista.innerHTML;
+    const input = document.getElementById('buscar-asunto');
+    const lista = document.getElementById('lista-asuntos');
+    const estado = document.getElementById('search-status');
+    const listadoOriginal = lista.innerHTML;
 
     let timeout = null;
 
     input.addEventListener('input', () => {
-
         clearTimeout(timeout);
 
-        const valor =
-            input.value.trim();
+        const valor = input.value.trim();
 
         if (valor === '') {
-
-            lista.innerHTML =
-                listadoOriginal;
-
-            estado.textContent =
-                'Mostrando asuntos disponibles.';
-
+            lista.innerHTML = listadoOriginal;
+            estado.textContent = textos.mostrando;
             return;
         }
 
-        timeout = setTimeout(
-            () => buscar(valor),
-            250
-        );
+        timeout = setTimeout(() => buscar(valor), 250);
     });
 
     async function buscar(query) {
-
-        estado.textContent =
-            `search "${query}"...`;
+        estado.textContent = `search "${query}"...`;
 
         try {
+            const url = `{{ route('asuntos.buscar') }}?q=${encodeURIComponent(query)}`;
 
-            const url =
-                `{{ route('asuntos.buscar') }}` +
-                `?q=${encodeURIComponent(query)}`;
-
-            const response =
-                await fetch(url, {
-                    headers: {
-                        'Accept':
-                            'application/json'
-                    }
-                });
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' }
+            });
 
             if (!response.ok) {
-                throw new Error(
-                    'Error en la búsqueda'
-                );
+                throw new Error('search failed');
             }
 
-            const asuntos =
-                await response.json();
-
+            const asuntos = await response.json();
             lista.innerHTML = '';
 
             if (asuntos.length === 0) {
-
-                lista.innerHTML = `
-                    <li class="muted">
-                        No se encontraron asuntos.
-                    </li>
-                `;
-
-                estado.textContent =
-                    '0 resultados';
-
+                const li = document.createElement('li');
+                li.className = 'muted';
+                li.textContent = textos.sinResultados;
+                lista.appendChild(li);
+                estado.textContent = `0 ${textos.resultados}`;
                 return;
             }
 
             asuntos.forEach(asunto => {
+                const li = document.createElement('li');
+                const enlace = document.createElement('a');
 
-                const li =
-                    document.createElement('li');
-
-                const enlace =
-                    document.createElement('a');
-
-                enlace.href =
-                    asunto.url;
-
-                enlace.textContent =
-                    asunto.titulo;
-
+                enlace.href = asunto.url;
+                enlace.textContent = asunto.titulo;
                 li.appendChild(enlace);
 
                 if (asunto.expira) {
-
-                    const meta =
-                        document.createElement(
-                            'span'
-                        );
-
-                    meta.className =
-                        'muted';
-
-                    meta.textContent =
-                        ` · expira ${asunto.expira}`;
-
+                    const meta = document.createElement('span');
+                    meta.className = 'muted';
+                    meta.textContent = ` · ${textos.expira} ${asunto.expira}`;
                     li.appendChild(meta);
                 }
 
                 lista.appendChild(li);
             });
 
-            estado.textContent =
-                `${asuntos.length} resultado(s)`;
-
+            estado.textContent = `${asuntos.length} ${textos.resultados}`;
         } catch (error) {
-
-            estado.textContent =
-                'No fue posible realizar la búsqueda.';
+            estado.textContent = textos.error;
         }
     }
-
 });
 </script>
-
 @endpush

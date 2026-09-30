@@ -1,6 +1,6 @@
 @extends('layouts.terminal')
 
-@section('title', 'Crear asunto')
+@section('title', __('messages.create_thread'))
 
 @section('terminal-title')
 anonymous@chat:~$ new-thread
@@ -9,59 +9,27 @@ anonymous@chat:~$ new-thread
 @section('content')
 
 <p>
-    <span class="prompt">
-        anonymous@chat:~$
-    </span>
-
-    <span class="command">
-        create --anonymous
-    </span>
+    <span class="prompt">anonymous@chat:~$</span>
+    <span class="command">create --anonymous</span>
 </p>
 
 <div class="line"></div>
+
 <div class="message">
-
-    <p class="success">
-        [ NEW THREAD ]
-    </p>
-
-    <p class="muted">
-        Creá un asunto único para iniciar
-        una conversación.
-    </p>
-
-    <p class="muted">
-        La contraseña será necesaria para
-        que otros usuarios puedan abrirla.
-        No podrá recuperarse si la olvidás.
-    </p>
-
-    <p class="muted">
-        El contenido de los mensajes y los
-        archivos adjuntos se almacenan
-        cifrados.
-    </p>
-
-    <p class="warning">
-        Cuando llegue la fecha de expiración,
-        el asunto dejará de estar disponible
-        públicamente.
-    </p>
-
+    <p class="success">[ {{ __('messages.new_thread') }} ]</p>
+    <p class="muted">{{ __('messages.new_thread_help') }}</p>
+    <p class="muted">{{ __('messages.new_thread_password_help') }}</p>
+    <p class="muted">{{ __('messages.new_thread_encryption_help') }}</p>
+    <p class="warning">{{ __('messages.new_thread_expiration_help') }}</p>
 </div>
 
 <div class="line"></div>
-<form
-    action="{{ route('asuntos.store') }}"
-    method="POST"
->
+
+<form action="{{ route('asuntos.store') }}" method="POST">
     @csrf
 
     <div class="field">
-        <label for="titulo">
-            asunto:
-        </label>
-
+        <label for="titulo">{{ __('messages.subject') }}:</label>
         <input
             id="titulo"
             type="text"
@@ -70,17 +38,11 @@ anonymous@chat:~$ new-thread
             autocomplete="off"
             autofocus
         >
-        <div
-            id="titulo-sugerencias"
-            style="margin-top:10px;"
-        ></div>
+        <div id="titulo-sugerencias" style="margin-top:10px;"></div>
     </div>
 
     <div class="field">
-        <label for="password">
-            password:
-        </label>
-
+        <label for="password">{{ __('messages.password') }}:</label>
         <input
             id="password"
             type="password"
@@ -90,10 +52,7 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="password_confirmation">
-            repeat_password:
-        </label>
-
+        <label for="password_confirmation">{{ __('messages.repeat_password') }}:</label>
         <input
             id="password_confirmation"
             type="password"
@@ -103,10 +62,7 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="expira_at">
-            expires_at:
-        </label>
-
+        <label for="expira_at">{{ __('messages.expires_at') }}:</label>
         <input
             id="expira_at"
             type="datetime-local"
@@ -116,176 +72,107 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="mensaje">
-            message:
-        </label>
-
-        <textarea
-            id="mensaje"
-            name="mensaje"
-            rows="9"
-        >{{ old('mensaje') }}</textarea>
+        <label for="mensaje">{{ __('messages.message') }}:</label>
+        <textarea id="mensaje" name="mensaje" rows="9">{{ old('mensaje') }}</textarea>
     </div>
 
-    <button type="submit">
-        ./create-thread
-    </button>
-
+    <button type="submit">./{{ __('messages.create') }}</button>
 </form>
 
 <div class="line"></div>
 
-<a href="{{ route('asuntos.index') }}">
-    ← volver
-</a>
+<a href="{{ route('asuntos.index') }}">← {{ __('messages.back') }}</a>
 
 @endsection
 
 @push('scripts')
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const textos = {
+        disponible: @json(__('messages.available')),
+        nombreDisponible: @json(__('messages.name_available')),
+        existe: @json(__('messages.exists')),
+        asuntoExiste: @json(__('messages.thread_exists')),
+        sugerencias: @json(__('messages.suggestions')),
+        seleccionado: @json(__('messages.selected')),
+    };
 
-    const input =
-        document.getElementById('titulo');
-
-    const contenedor =
-        document.getElementById(
-            'titulo-sugerencias'
-        );
-
+    const input = document.getElementById('titulo');
+    const contenedor = document.getElementById('titulo-sugerencias');
     let timeout = null;
 
     input.addEventListener('input', () => {
-
         clearTimeout(timeout);
-
-        timeout = setTimeout(
-            comprobar,
-            400
-        );
-
+        timeout = setTimeout(comprobar, 400);
     });
 
     async function comprobar() {
-
-        const titulo =
-            input.value.trim();
+        const titulo = input.value.trim();
 
         if (titulo.length < 3) {
             contenedor.innerHTML = '';
             return;
         }
 
-        const url =
-            `{{ route('asuntos.sugerencias') }}` +
-            `?titulo=${encodeURIComponent(titulo)}`;
+        const url = `{{ route('asuntos.sugerencias') }}?titulo=${encodeURIComponent(titulo)}`;
 
         try {
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' }
+            });
 
-            const response =
-                await fetch(url, {
-                    headers: {
-                        'Accept':
-                            'application/json'
-                    }
-                });
+            if (!response.ok) {
+                throw new Error('suggestion failed');
+            }
 
-            const data =
-                await response.json();
+            const data = await response.json();
 
             if (!data.existe) {
+                contenedor.innerHTML = '';
 
-                contenedor.innerHTML = `
-                    <span class="success">
-                        [ AVAILABLE ]
-                        Nombre disponible.
-                    </span>
-                `;
-
+                const span = document.createElement('span');
+                span.className = 'success';
+                span.textContent = `[ ${textos.disponible} ] ${textos.nombreDisponible}`;
+                contenedor.appendChild(span);
                 return;
             }
 
-            let html = `
-                <div class="warning">
-                    [ EXISTS ]
-                    Ese asunto ya existe.
-                </div>
+            contenedor.innerHTML = '';
 
-                <div class="muted">
-                    suggestions:
-                </div>
-            `;
+            const aviso = document.createElement('div');
+            aviso.className = 'warning';
+            aviso.textContent = `[ ${textos.existe} ] ${textos.asuntoExiste}`;
+            contenedor.appendChild(aviso);
 
-            data.sugerencias.forEach(
-                sugerencia => {
+            const tituloSugerencias = document.createElement('div');
+            tituloSugerencias.className = 'muted';
+            tituloSugerencias.textContent = `${textos.sugerencias}:`;
+            contenedor.appendChild(tituloSugerencias);
 
-                    html += `
-                        <button
-                            type="button"
-                            class="titulo-sugerido"
-                            data-titulo="${escapar(
-                                sugerencia
-                            )}"
-                            style="
-                                margin-top:6px;
-                                margin-right:6px;
-                            "
-                        >
-                            ${escapar(
-                                sugerencia
-                            )}
-                        </button>
-                    `;
-                }
-            );
+            data.sugerencias.forEach(sugerencia => {
+                const boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'titulo-sugerido';
+                boton.textContent = sugerencia;
+                boton.style.marginTop = '6px';
+                boton.style.marginRight = '6px';
 
-            contenedor.innerHTML = html;
+                boton.addEventListener('click', () => {
+                    input.value = sugerencia;
+                    contenedor.innerHTML = '';
 
-            document
-                .querySelectorAll(
-                    '.titulo-sugerido'
-                )
-                .forEach(boton => {
-
-                    boton.addEventListener(
-                        'click',
-                        () => {
-
-                            input.value =
-                                boton.dataset.titulo;
-
-                            contenedor.innerHTML = `
-                                <span class="success">
-                                    [ SELECTED ]
-                                    ${escapar(
-                                        boton.dataset.titulo
-                                    )}
-                                </span>
-                            `;
-                        }
-                    );
-
+                    const seleccionado = document.createElement('span');
+                    seleccionado.className = 'success';
+                    seleccionado.textContent = `[ ${textos.seleccionado} ] ${sugerencia}`;
+                    contenedor.appendChild(seleccionado);
                 });
 
-        } catch {
-
+                contenedor.appendChild(boton);
+            });
+        } catch (error) {
             contenedor.innerHTML = '';
         }
     }
-
-    function escapar(texto) {
-
-        const div =
-            document.createElement('div');
-
-        div.textContent =
-            texto;
-
-        return div.innerHTML;
-    }
-
 });
 </script>
-
 @endpush
