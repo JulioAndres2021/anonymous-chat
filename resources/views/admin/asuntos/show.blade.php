@@ -75,7 +75,23 @@ root@anonymous-chat:/admin/asuntos/{{ $asunto->id }}#
 <p>
     access_records={{ $asunto->intentos_acceso_count }}
 </p>
+<p>
+    status=
+    <span class="success">
+        ACTIVE
+    </span>
+</p>
 
+@if ($asunto->expira_at)
+
+    <p>
+        remaining={{
+            $asunto->expira_at
+                ->diffForHumans()
+        }}
+    </p>
+
+@endif
 <div class="line"></div>
 
 <p>

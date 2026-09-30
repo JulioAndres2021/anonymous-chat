@@ -82,7 +82,7 @@ class AdminAuthTest extends TestCase
         );
 
         $response->assertRedirect(
-            route('admin.login')
+            route('asuntos.index')
         );
 
         $this->assertGuest();
