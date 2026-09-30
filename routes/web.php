@@ -21,11 +21,13 @@ Route::post('/asuntos', [AsuntoController::class, 'store'])->name('asuntos.store
 
 Route::get('/a/{asunto}', [AccesoAsuntoController::class, 'show'])->name('asuntos.acceso');
 
+Route::get('/a/{asunto}/chat', [AccesoAsuntoController::class, 'chat'])->middleware('asunto.desbloqueado')->name('asuntos.chat');
+
+Route::post('/a/{asunto}/lock', [AccesoAsuntoController::class, 'lock'])->middleware('asunto.desbloqueado')->name('asuntos.lock');
+
 Route::post('/a/{asunto}/unlock', [AccesoAsuntoController::class, 'unlock'])->name('asuntos.unlock');
 
-Route::get('/a/{asunto}/chat', [AccesoAsuntoController::class, 'chat'])
-    ->middleware('asunto.desbloqueado')
-    ->name('asuntos.chat');
+
 
 Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])
     ->middleware('asunto.desbloqueado')

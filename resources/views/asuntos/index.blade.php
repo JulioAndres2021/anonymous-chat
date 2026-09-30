@@ -6,6 +6,16 @@
 anonymous@chat:~$ ls asuntos
 @endsection
 
+@section('terminal-image')
+
+<img
+    src="{{ asset(
+        'images/anonymous-chat.png'
+    ) }}"
+    alt="Anonymous Chat"
+>
+
+@endsection
 @section('content')
 
 <div class="nav">

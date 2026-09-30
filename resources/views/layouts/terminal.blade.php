@@ -221,6 +221,48 @@
             color: #888;
         }
 
+        .lock-thread-button {
+            color: #ff5f56;
+            border-color: #ff5f56;
+        }
+
+        .lock-thread-button:hover {
+            background: #ff5f56;
+            color: #000;
+        }
+
+        .terminal-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .terminal-header-title {
+            min-width: 0;
+        }
+
+        .terminal-header-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .terminal-header-image img {
+            display: block;
+            max-width: 90px;
+            max-height: 60px;
+            object-fit: contain;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+            .terminal-header-image img {
+                max-width: 60px;
+                max-height: 45px;
+            }
+        }
+
         @media (max-width: 700px) {
             .terminal {
                 width: 96%;
@@ -242,10 +284,29 @@
 
 <body>
 
-<div class="terminal">
+    <div class="terminal">
 
-    <div class="terminal-header">
-        @yield('terminal-title', 'anonymous@chat:~$')
+        <div class="terminal-header">
+
+        <div class="terminal-header-content">
+
+            <div class="terminal-header-title">
+                @yield(
+                    'terminal-title',
+                    'anonymous@chat:~$'
+                )
+            </div>
+
+            @hasSection('terminal-image')
+
+                <div class="terminal-header-image">
+                    @yield('terminal-image')
+                </div>
+
+            @endif
+
+        </div>
+
     </div>
 
     <main class="terminal-body">

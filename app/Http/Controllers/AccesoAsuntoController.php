@@ -161,4 +161,18 @@ class AccesoAsuntoController extends Controller
             compact('asunto', 'mensajes')
         );
     }
+
+    public function lock(Request $request, Asunto $asunto): RedirectResponse 
+    {
+        $request->session()->forget(
+            "asuntos_desbloqueados.{$asunto->id}"
+        );
+
+        return redirect()
+            ->route('asuntos.acceso', $asunto)
+            ->with(
+                'success',
+                'Conversación bloqueada correctamente.'
+            );
+    }
 }

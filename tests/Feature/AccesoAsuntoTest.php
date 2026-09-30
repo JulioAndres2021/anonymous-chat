@@ -109,4 +109,36 @@ class AccesoAsuntoTest extends TestCase
             ]
         );
     }
+
+    public function test_usuario_puede_bloquear_conversacion_manualmente(): void
+    {
+        $asunto = $this->crearAsunto();
+
+        $this->post(
+            route('asuntos.unlock', $asunto),
+            [
+                'password' => 'password123',
+            ]
+        );
+
+        $this->assertTrue(
+            session()->has(
+                "asuntos_desbloqueados.{$asunto->id}"
+            )
+        );
+
+        $response = $this->post(
+            route('asuntos.lock', $asunto)
+        );
+
+        $response->assertRedirect(
+            route('asuntos.acceso', $asunto)
+        );
+
+        $this->assertFalse(
+            session()->has(
+                "asuntos_desbloqueados.{$asunto->id}"
+            )
+        );
+    }
 }

@@ -18,6 +18,24 @@ anonymous@chat:~/{{ $asunto->slug }}$
     </span>
 </p>
 
+<form
+    method="POST"
+    action="{{ route(
+        'asuntos.lock',
+        $asunto
+    ) }}"
+    style="margin-bottom: 20px;"
+>
+    @csrf
+
+    <button
+        type="submit"
+        class="lock-thread-button"
+    >
+        [ LOCK THREAD ]
+    </button>
+</form>
+
 <p class="success">
     [ UNLOCKED ]
 </p>
