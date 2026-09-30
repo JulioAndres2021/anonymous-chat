@@ -59,7 +59,15 @@ root@anonymous-chat:/admin/asuntos/{{ $asunto->id }}#
         )->format('d/m/Y H:i:s')
     }}
 </p>
+@if ($asunto->expira_at)
 
+    <p>
+        remaining={{
+            $asunto->expira_at->diffForHumans()
+        }}
+    </p>
+
+@endif
 <p>
     messages={{ $asunto->mensajes_count }}
 </p>

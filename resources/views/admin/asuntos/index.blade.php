@@ -120,17 +120,19 @@ root@anonymous-chat:/admin/asuntos#
                 {{ $asunto->titulo }}
             </a>
 
-            <div class="muted">
-                slug={{ $asunto->slug }}
-                |
-                messages={{ $asunto->mensajes_count }}
-                |
-                expires={{
-                    optional(
-                        $asunto->expira_at
-                    )->format('d/m/Y H:i')
-                }}
-            </div>
+            <span class="muted">
+                · expira
+                {{ optional(
+                    $asunto->expira_at
+                )->format('d/m/Y H:i') }}
+            </span>
+
+            @if ($asunto->expira_at)
+                <span class="warning">
+                    · quedan
+                    {{ $asunto->expira_at->diffForHumans() }}
+                </span>
+            @endif
 
         </li>
 

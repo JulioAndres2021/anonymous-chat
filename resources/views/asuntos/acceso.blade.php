@@ -31,6 +31,22 @@ anonymous@chat:~/{{ $asunto->slug }}$
     [ LOCKED ] password required
 </p>
 
+@if ($asunto->expira_at)
+
+    <p class="muted">
+        expires_at={{
+            $asunto->expira_at->format('d/m/Y H:i:s')
+        }}
+    </p>
+
+    <p class="warning">
+        remaining={{
+            $asunto->expira_at->diffForHumans()
+        }}
+    </p>
+
+@endif
+
 <p class="muted">
     Para leer o responder esta conversación
     necesitás la contraseña definida por

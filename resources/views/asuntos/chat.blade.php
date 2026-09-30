@@ -21,6 +21,27 @@ anonymous@chat:~/{{ $asunto->slug }}$
 <p class="success">
     [ UNLOCKED ]
 </p>
+<p>
+    status=
+    <span class="success">
+        ACTIVE
+    </span>
+</p>
+@if ($asunto->expira_at)
+
+    <p class="muted">
+        expires_at={{
+            $asunto->expira_at->format('d/m/Y H:i:s')
+        }}
+    </p>
+
+    <p class="warning">
+        remaining={{
+            $asunto->expira_at->diffForHumans()
+        }}
+    </p>
+
+@endif
 
 <p class="muted">
     Podés leer la conversación, responder
