@@ -8,6 +8,7 @@ use App\Services\CifradoConversacionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Storage;
 
 class AdminAsuntoTest extends TestCase
 {
@@ -147,5 +148,112 @@ class AdminAsuntoTest extends TestCase
         $response->assertSee(
             'Mensaje visible para admin'
         );
+    }
+
+    public function test_admin_puede_eliminar_asunto_definitivamente(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@test.com',
+            'password' =>
+                Hash::make('Admin1234!'),
+        ]);
+
+        $service =
+            app(CifradoConversacionService::class);
+
+        $clave =
+            $service->generarClaveConversacion();
+
+        $asunto = Asunto::create([
+            'titulo' => 'Eliminar Definitivo',
+            'slug' => 'eliminar-definitivo',
+
+            'password_hash' =>
+                Hash::make('password123'),
+
+            'clave_password_cifrada' =>
+                $service->protegerClaveConPassword(
+                    $clave,
+                    'password123'
+                ),
+
+            'clave_admin_cifrada' => null,
+
+            'expira_at' =>
+                now()->subDay(),
+        ]);
+
+        $mensaje =
+            $asunto->mensajes()->create([
+                'contenido_cifrado' =>
+                    $service->cifrarMensaje(
+                        'Mensaje a eliminar',
+                        $clave
+                    ),
+            ]);
+
+        $ruta =
+            'anonymous-chat/prueba.enc';
+
+        Storage::disk('local')->put(
+            $ruta,
+            'contenido-cifrado'
+        );
+
+        $adjunto =
+            $mensaje->adjuntos()->create([
+                'nombre_original_cifrado' =>
+                    encrypt('prueba.jpg'),
+
+                'ruta' => $ruta,
+                'mime' => 'image/jpeg',
+                'tamano' => 100,
+            ]);
+
+        $adjunto->delete();
+        $mensaje->delete();
+        $asunto->delete();
+
+        sodium_memzero($clave);
+
+        $this->actingAs($admin);
+
+        $response = $this->delete(
+            route(
+                'admin.papelera.destroy',
+                $asunto->id
+            )
+        );
+
+        $response->assertRedirect(
+            route('admin.papelera')
+        );
+
+        $this->assertDatabaseMissing(
+            'asuntos',
+            [
+                'id' => $asunto->id,
+            ]
+        );
+
+        $this->assertDatabaseMissing(
+            'mensajes',
+            [
+                'id' => $mensaje->id,
+            ]
+        );
+
+        $this->assertDatabaseMissing(
+            'adjuntos',
+            [
+                'id' => $adjunto->id,
+            ]
+        );
+
+        Storage::disk('local')
+            ->assertMissing($ruta);
     }
 }

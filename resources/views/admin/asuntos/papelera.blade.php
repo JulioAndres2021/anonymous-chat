@@ -37,6 +37,30 @@ root@anonymous-chat:/admin/trash#
                 @csrf
                 <button type="submit">{{ __('messages.restore') }}</button>
             </form>
+
+            <form
+                method="POST"
+                action="{{ route(
+                    'admin.papelera.destroy',
+                    $asunto->id
+                ) }}"
+                style="margin-top:10px;"
+                onsubmit="return confirm(
+                    @js(
+                        __('messages.delete_permanently_confirm')
+                    )
+                );"
+            >
+                @csrf
+                @method('DELETE')
+
+                <button
+                    type="submit"
+                    class="lock-thread-button"
+                >
+                    {{ __('messages.delete_permanently') }}
+                </button>
+            </form>
         </li>
     @empty
         <li class="muted">{{ __('messages.trash_empty') }}</li>

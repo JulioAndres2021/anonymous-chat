@@ -152,5 +152,7 @@ Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
                     ->middleware('throttle:adjuntos')
                     ->name('adjuntos.show');
 
+                Route::delete('/papelera/{id}', [AdminAsuntoController::class, 'eliminarDefinitivamente'])->name('papelera.destroy');
+
         });
     });

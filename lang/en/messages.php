@@ -98,8 +98,9 @@ return [
     'blocked_until' => 'blocked_until',
     'access_records' => 'access_records',
     'title' => 'title',
-    'too_many_login_attempts' =>
-    'Too many login attempts. Wait one minute before trying again.',
-    'thread_created_success' =>
-    "Thread ':title' was created successfully.",
+    'too_many_login_attempts' => 'Too many login attempts. Wait one minute before trying again.',
+    'thread_created_success' => "Thread ':title' was created successfully.",
+    'delete_permanently' => 'DELETE PERMANENTLY',
+    'delete_permanently_confirm' => 'This action cannot be undone. Messages and encrypted files will be deleted.',
+    'thread_deleted_permanently' => 'The thread was permanently deleted.',
 ];

@@ -10,6 +10,9 @@ use App\Services\CifradoConversacionService;
 use Throwable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
 
 class AsuntoController extends Controller
 {
@@ -150,6 +153,58 @@ class AsuntoController extends Controller
             ->with(
                 'success',
                 'Asunto restaurado correctamente.'
+            );
+    }
+
+    public function eliminarDefinitivamente(int $id): RedirectResponse 
+    {
+        $asunto = Asunto::onlyTrashed()
+            ->findOrFail($id);
+
+        DB::transaction(function () use ($asunto) {
+
+            $mensajes = $asunto
+                ->mensajes()
+                ->withTrashed()
+                ->with([
+                    'adjuntos' => function ($query) {
+                        $query->withTrashed();
+                    },
+                ])
+                ->get();
+
+            foreach ($mensajes as $mensaje) {
+
+                foreach ($mensaje->adjuntos as $adjunto) {
+
+                    if (
+                        $adjunto->ruta &&
+                        Storage::disk('local')
+                            ->exists($adjunto->ruta)
+                    ) {
+                        Storage::disk('local')
+                            ->delete($adjunto->ruta);
+                    }
+
+                    $adjunto->forceDelete();
+                }
+
+                $mensaje->forceDelete();
+            }
+
+            $asunto->intentosAcceso()
+                ->delete();
+
+            $asunto->forceDelete();
+        });
+
+        return redirect()
+            ->route('admin.papelera')
+            ->with(
+                'success',
+                __(
+                    'messages.thread_deleted_permanently'
+                )
             );
     }
 

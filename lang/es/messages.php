@@ -100,4 +100,7 @@ return [
     'title' => 'título',
     'too_many_login_attempts' =>
     'Demasiados intentos de acceso. Esperá un minuto antes de volver a intentarlo.',
+    'delete_permanently' => 'ELIMINAR DEFINITIVAMENTE',
+    'delete_permanently_confirm' => 'Esta acción no se puede deshacer. Se eliminarán mensajes y archivos cifrados.',
+    'thread_deleted_permanently' => 'El asunto fue eliminado definitivamente.',
 ];
