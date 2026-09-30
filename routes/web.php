@@ -36,9 +36,19 @@ Route::get(
 
 Route::get('/crear', [AsuntoController::class, 'create'])->name('asuntos.create');
 
-Route::get('/buscar-asuntos', [AsuntoController::class, 'buscar'])->name('asuntos.buscar');
+Route::get(
+    '/buscar-asuntos',
+    [AsuntoController::class, 'buscar']
+)
+    ->middleware('throttle:buscar-asuntos')
+    ->name('asuntos.buscar');
 
-Route::post('/asuntos', [AsuntoController::class, 'store'])->name('asuntos.store');
+Route::post(
+    '/asuntos',
+    [AsuntoController::class, 'store']
+)
+    ->middleware('throttle:crear-asunto')
+    ->name('asuntos.store');
 
 Route::get('/a/{asunto}', [AccesoAsuntoController::class, 'show'])->name('asuntos.acceso');
 
@@ -46,17 +56,33 @@ Route::get('/a/{asunto}/chat', [AccesoAsuntoController::class, 'chat'])->middlew
 
 Route::post('/a/{asunto}/lock', [AccesoAsuntoController::class, 'lock'])->middleware('asunto.desbloqueado')->name('asuntos.lock');
 
-Route::post('/a/{asunto}/unlock', [AccesoAsuntoController::class, 'unlock'])->name('asuntos.unlock');
+Route::post(
+    '/a/{asunto}/unlock',
+    [AccesoAsuntoController::class, 'unlock']
+)
+    ->middleware('throttle:desbloquear-asunto')
+    ->name('asuntos.unlock');
 
 
 Route::post('/a/{asunto}/mensajes', [MensajeController::class, 'store'])
-    ->middleware('asunto.desbloqueado')
-    ->name('mensajes.store');
+    ->middleware([
+        'asunto.desbloqueado',
+        'throttle:enviar-mensaje',
+    ])->name('mensajes.store');
 
 Route::get('/a/{asunto}/adjuntos/{adjunto}', [AdjuntoController::class, 'show'])
-    ->middleware('asunto.desbloqueado')
+    ->middleware([
+        'asunto.desbloqueado',
+        'throttle:adjuntos',
+    ])
     ->name('adjuntos.show');
-Route::get('/asuntos/sugerencias', [AsuntoController::class, 'sugerencias'])->name('asuntos.sugerencias');
+
+    Route::get(
+    '/asuntos/sugerencias',
+    [AsuntoController::class, 'sugerencias']
+)
+    ->middleware('throttle:sugerencias-asuntos')
+    ->name('asuntos.sugerencias');
 
     Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -73,6 +99,7 @@ Route::get('/asuntos/sugerencias', [AsuntoController::class, 'sugerencias'])->na
                     '/login',
                     [AuthController::class, 'login']
                 )
+                    ->middleware('throttle:admin-login')
                     ->name('login.store');
         });
 
@@ -121,8 +148,8 @@ Route::get('/asuntos/sugerencias', [AsuntoController::class, 'sugerencias'])->na
                 )
                     ->name('intentos.index');
 
-                Route::get('/adjuntos/{adjunto}', [AdminAdjuntoController::class, 'show']
-)
+                Route::get('/adjuntos/{adjunto}', [AdminAdjuntoController::class, 'show'])
+                    ->middleware('throttle:adjuntos')
                     ->name('adjuntos.show');
 
         });
