@@ -255,5 +255,26 @@ class AdminAsuntoTest extends TestCase
 
         Storage::disk('local')
             ->assertMissing($ruta);
+
+        $this->assertDatabaseHas(
+            'purgas_archivos',
+            [
+                'ruta' => $ruta,
+            ]
+        );
+
+        $purga =
+            \App\Models\PurgaArchivo::
+                where(
+                    'ruta',
+                    $ruta
+                )
+                ->firstOrFail();
+
+        $this->assertNotNull(
+            $purga->purgado_at
+        );
+
+
     }
 }

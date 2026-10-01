@@ -11,15 +11,17 @@ use Throwable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Models\PurgaArchivo;
+use App\Services\PurgaArchivoService;
 
 
 class AsuntoController extends Controller
 {
-    public function __construct(
-        private readonly CifradoConversacionService $cifradoService
-    ) {
-    }
+    public function __construct
+    (
+        private readonly CifradoConversacionService $cifradoService,
+        private readonly PurgaArchivoService $purgaArchivoService
+    ) {}
 
     public function index(): View
     {
@@ -156,47 +158,94 @@ class AsuntoController extends Controller
             );
     }
 
-    public function eliminarDefinitivamente(int $id): RedirectResponse 
+    public function eliminarDefinitivamente(int $id): RedirectResponse
     {
         $asunto = Asunto::onlyTrashed()
             ->findOrFail($id);
 
-        DB::transaction(function () use ($asunto) {
+        $purgas = collect();
 
-            $mensajes = $asunto
-                ->mensajes()
-                ->withTrashed()
-                ->with([
-                    'adjuntos' => function ($query) {
-                        $query->withTrashed();
-                    },
-                ])
-                ->get();
+        DB::transaction(
+            function () use (
+                $asunto,
+                &$purgas
+            ) {
+                $mensajes = $asunto
+                    ->mensajes()
+                    ->withTrashed()
+                    ->with([
+                        'adjuntos' =>
+                            function ($query) {
+                                $query
+                                    ->withTrashed();
+                            },
+                    ])
+                    ->get();
 
-            foreach ($mensajes as $mensaje) {
-
-                foreach ($mensaje->adjuntos as $adjunto) {
-
-                    if (
-                        $adjunto->ruta &&
-                        Storage::disk('local')
-                            ->exists($adjunto->ruta)
+                foreach (
+                    $mensajes as $mensaje
+                ) {
+                    foreach (
+                        $mensaje->adjuntos
+                        as $adjunto
                     ) {
-                        Storage::disk('local')
-                            ->delete($adjunto->ruta);
+                        if ($adjunto->ruta) {
+
+                            $purga =
+                                PurgaArchivo::
+                                    firstOrCreate(
+                                        [
+                                            'disk' =>
+                                                'local',
+
+                                            'ruta' =>
+                                                $adjunto
+                                                    ->ruta,
+                                        ]
+                                    );
+
+                            $purgas->push(
+                                $purga
+                            );
+                        }
+
+                        $adjunto
+                            ->forceDelete();
                     }
 
-                    $adjunto->forceDelete();
+                    $mensaje
+                        ->forceDelete();
                 }
 
-                $mensaje->forceDelete();
+                /*
+                * Estos registros ya no tienen
+                * utilidad una vez que el asunto
+                * se elimina definitivamente.
+                */
+                $asunto
+                    ->intentosAcceso()
+                    ->delete();
+
+                $asunto
+                    ->forceDelete();
             }
+        );
 
-            $asunto->intentosAcceso()
-                ->delete();
-
-            $asunto->forceDelete();
-        });
+        /*
+        * Esta parte ocurre SOLO después
+        * del COMMIT de la BD.
+        */
+        $purgas
+            ->unique('id')
+            ->each(
+                function ($purga) {
+                    $this
+                        ->purgaArchivoService
+                        ->procesar(
+                            $purga->fresh()
+                        );
+                }
+            );
 
         return redirect()
             ->route('admin.papelera')
@@ -208,5 +257,5 @@ class AsuntoController extends Controller
             );
     }
 
-    
+
 }
