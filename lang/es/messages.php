@@ -103,4 +103,18 @@ return [
     'delete_permanently' => 'ELIMINAR DEFINITIVAMENTE',
     'delete_permanently_confirm' => 'Esta acción no se puede deshacer. Se eliminarán mensajes y archivos cifrados.',
     'thread_deleted_permanently' => 'El asunto fue eliminado definitivamente.',
+    'search_error' =>
+    'No fue posible realizar la búsqueda.',
+
+    'title_available' =>
+        'Nombre disponible.',
+
+    'title_exists' =>
+        'Ese asunto ya existe.',
+
+    'suggestions' =>
+        'Sugerencias',
+
+    'selected' =>
+        'Seleccionado',
 ];

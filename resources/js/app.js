@@ -1,1 +1,21 @@
-//
+import '../css/app.css';
+import './home-search';
+import './thread-suggestions';
+
+document.addEventListener('DOMContentLoaded', () => {
+    document
+        .querySelectorAll('form[data-confirm]')
+        .forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                const message =
+                    form.dataset.confirm;
+
+                if (
+                    message &&
+                    !window.confirm(message)
+                ) {
+                    event.preventDefault();
+                }
+            });
+        });
+});

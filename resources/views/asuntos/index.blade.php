@@ -74,93 +74,22 @@ anonymous@chat:~$ ls asuntos
     @endforelse
 </ul>
 
-<div class="pagination">
+<div
+    data-thread-search
+    data-search-url="{{ route('asuntos.buscar') }}"
+    data-showing-text="{{ __('messages.showing_threads') }}"
+    data-no-results-text="{{ __('messages.no_results') }}"
+    data-results-text="{{ __('messages.results') }}"
+    data-error-text="{{ __('messages.search_error') }}"
+    data-expires-text="{{ __('messages.expires') }}"
+>
+<div
+    id="asuntos-pagination"
+    class="pagination"
+>
     {{ $asuntos->links() }}
 </div>
 
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const textos = {
-        mostrando: @json(__('messages.showing_threads')),
-        sinResultados: @json(__('messages.no_results')),
-        resultados: @json(__('messages.results')),
-        error: @json(__('messages.search_error')),
-        expira: @json(__('messages.expires')),
-    };
 
-    const input = document.getElementById('buscar-asunto');
-    const lista = document.getElementById('lista-asuntos');
-    const estado = document.getElementById('search-status');
-    const listadoOriginal = lista.innerHTML;
-
-    let timeout = null;
-
-    input.addEventListener('input', () => {
-        clearTimeout(timeout);
-
-        const valor = input.value.trim();
-
-        if (valor === '') {
-            lista.innerHTML = listadoOriginal;
-            estado.textContent = textos.mostrando;
-            return;
-        }
-
-        timeout = setTimeout(() => buscar(valor), 250);
-    });
-
-    async function buscar(query) {
-        estado.textContent = `search "${query}"...`;
-
-        try {
-            const url = `{{ route('asuntos.buscar') }}?q=${encodeURIComponent(query)}`;
-
-            const response = await fetch(url, {
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) {
-                throw new Error('search failed');
-            }
-
-            const asuntos = await response.json();
-            lista.innerHTML = '';
-
-            if (asuntos.length === 0) {
-                const li = document.createElement('li');
-                li.className = 'muted';
-                li.textContent = textos.sinResultados;
-                lista.appendChild(li);
-                estado.textContent = `0 ${textos.resultados}`;
-                return;
-            }
-
-            asuntos.forEach(asunto => {
-                const li = document.createElement('li');
-                const enlace = document.createElement('a');
-
-                enlace.href = asunto.url;
-                enlace.textContent = asunto.titulo;
-                li.appendChild(enlace);
-
-                if (asunto.expira) {
-                    const meta = document.createElement('span');
-                    meta.className = 'muted';
-                    meta.textContent = ` · ${textos.expira} ${asunto.expira}`;
-                    li.appendChild(meta);
-                }
-
-                lista.appendChild(li);
-            });
-
-            estado.textContent = `${asuntos.length} ${textos.resultados}`;
-        } catch (error) {
-            estado.textContent = textos.error;
-        }
-    }
-});
-</script>
-@endpush

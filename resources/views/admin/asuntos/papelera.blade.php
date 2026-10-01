@@ -32,7 +32,7 @@ root@anonymous-chat:/admin/trash#
             <form
                 method="POST"
                 action="{{ route('admin.papelera.restaurar', $asunto->id) }}"
-                style="margin-top:10px;"
+                class="stack-form"
             >
                 @csrf
                 <button type="submit">{{ __('messages.restore') }}</button>
@@ -44,12 +44,10 @@ root@anonymous-chat:/admin/trash#
                     'admin.papelera.destroy',
                     $asunto->id
                 ) }}"
-                style="margin-top:10px;"
-                onsubmit="return confirm(
-                    @js(
-                        __('messages.delete_permanently_confirm')
-                    )
-                );"
+                class="stack-form"
+                data-confirm="{{
+                    __('messages.delete_permanently_confirm')
+                }}"
             >
                 @csrf
                 @method('DELETE')

@@ -103,4 +103,18 @@ return [
     'delete_permanently' => 'DELETE PERMANENTLY',
     'delete_permanently_confirm' => 'This action cannot be undone. Messages and encrypted files will be deleted.',
     'thread_deleted_permanently' => 'The thread was permanently deleted.',
+    'search_error' =>
+    'Unable to perform the search.',
+
+'title_available' =>
+    'Name available.',
+
+'title_exists' =>
+    'That thread already exists.',
+
+'suggestions' =>
+    'Suggestions',
+
+'selected' =>
+    'Selected',
 ];

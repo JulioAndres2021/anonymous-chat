@@ -16,7 +16,7 @@ anonymous@chat:~/{{ $asunto->slug }}$
 <form
     method="POST"
     action="{{ route('asuntos.lock', $asunto) }}"
-    style="margin-bottom: 20px;"
+    class="lock-thread-form"
 >
     @csrf
     <button type="submit" class="lock-thread-button">
@@ -47,7 +47,7 @@ anonymous@chat:~/{{ $asunto->slug }}$
 
         @if ($mensaje->adjuntos->isNotEmpty())
             @foreach ($mensaje->adjuntos as $adjunto)
-                <div style="margin-top: 10px;">
+                <div class="attachment-link">
                     <a
                         href="{{ route('adjuntos.show', [$asunto, $adjunto]) }}"
                         target="_blank"

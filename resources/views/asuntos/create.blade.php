@@ -8,6 +8,24 @@ anonymous@chat:~$ new-thread
 
 @section('content')
 
+<div
+    data-thread-suggestions
+    data-suggestions-url="{{
+        route('asuntos.sugerencias')
+    }}"
+    data-available-text="{{
+        __('messages.title_available')
+    }}"
+    data-exists-text="{{
+        __('messages.title_exists')
+    }}"
+    data-suggestions-text="{{
+        __('messages.suggestions')
+    }}"
+    data-selected-text="{{
+        __('messages.selected')
+    }}"
+>
 <p>
     <span class="prompt">anonymous@chat:~$</span>
     <span class="command">create --anonymous</span>
@@ -38,7 +56,7 @@ anonymous@chat:~$ new-thread
             autocomplete="off"
             autofocus
         >
-        <div id="titulo-sugerencias" style="margin-top:10px;"></div>
+        <div id="titulo-sugerencias" class="suggestion-box"></div>
     </div>
 
     <div class="field">
@@ -85,94 +103,3 @@ anonymous@chat:~$ new-thread
 
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const textos = {
-        disponible: @json(__('messages.available')),
-        nombreDisponible: @json(__('messages.name_available')),
-        existe: @json(__('messages.exists')),
-        asuntoExiste: @json(__('messages.thread_exists')),
-        sugerencias: @json(__('messages.suggestions')),
-        seleccionado: @json(__('messages.selected')),
-    };
-
-    const input = document.getElementById('titulo');
-    const contenedor = document.getElementById('titulo-sugerencias');
-    let timeout = null;
-
-    input.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(comprobar, 400);
-    });
-
-    async function comprobar() {
-        const titulo = input.value.trim();
-
-        if (titulo.length < 3) {
-            contenedor.innerHTML = '';
-            return;
-        }
-
-        const url = `{{ route('asuntos.sugerencias') }}?titulo=${encodeURIComponent(titulo)}`;
-
-        try {
-            const response = await fetch(url, {
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) {
-                throw new Error('suggestion failed');
-            }
-
-            const data = await response.json();
-
-            if (!data.existe) {
-                contenedor.innerHTML = '';
-
-                const span = document.createElement('span');
-                span.className = 'success';
-                span.textContent = `[ ${textos.disponible} ] ${textos.nombreDisponible}`;
-                contenedor.appendChild(span);
-                return;
-            }
-
-            contenedor.innerHTML = '';
-
-            const aviso = document.createElement('div');
-            aviso.className = 'warning';
-            aviso.textContent = `[ ${textos.existe} ] ${textos.asuntoExiste}`;
-            contenedor.appendChild(aviso);
-
-            const tituloSugerencias = document.createElement('div');
-            tituloSugerencias.className = 'muted';
-            tituloSugerencias.textContent = `${textos.sugerencias}:`;
-            contenedor.appendChild(tituloSugerencias);
-
-            data.sugerencias.forEach(sugerencia => {
-                const boton = document.createElement('button');
-                boton.type = 'button';
-                boton.className = 'titulo-sugerido';
-                boton.textContent = sugerencia;
-                boton.style.marginTop = '6px';
-                boton.style.marginRight = '6px';
-
-                boton.addEventListener('click', () => {
-                    input.value = sugerencia;
-                    contenedor.innerHTML = '';
-
-                    const seleccionado = document.createElement('span');
-                    seleccionado.className = 'success';
-                    seleccionado.textContent = `[ ${textos.seleccionado} ] ${sugerencia}`;
-                    contenedor.appendChild(seleccionado);
-                });
-
-                contenedor.appendChild(boton);
-            });
-        } catch (error) {
-            contenedor.innerHTML = '';
-        }
-    }
-});
-</script>
-@endpush
