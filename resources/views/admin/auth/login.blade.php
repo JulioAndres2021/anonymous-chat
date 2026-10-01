@@ -36,7 +36,7 @@ root@anonymous-chat:/admin#
 
     <div class="field">
         <label>
-            <input type="checkbox" name="remember" value="1" style="width:auto;">
+            <input type="checkbox" name="remember" value="1" class="checkbox-auto">
             {{ __('messages.remember_session') }}
         </label>
     </div>

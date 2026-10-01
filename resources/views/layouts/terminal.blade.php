@@ -84,11 +84,6 @@
         
         <div class="locale-switcher">
 
-        {{-- <div style="margin-top: 24px;">
-            <span class="prompt">@yield('prompt', 'anonymous@chat:~$')</span>
-            <span class="cursor"></span>
-        </div> --}}
-
     </main>
 </div>
 

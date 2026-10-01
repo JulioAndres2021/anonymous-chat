@@ -226,3 +226,7 @@
 .stack-form {
     margin-top: 10px;
 }
+
+.checkbox-auto {
+    width: auto;
+}

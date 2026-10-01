@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Middleware\AsuntoDesbloqueado;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ContentSecurityPolicy;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,6 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup(
             'web',
             SecurityHeaders::class
+        );
+
+        $middleware->appendToGroup(
+            'web',
+            ContentSecurityPolicy::class
         );
 
     })
