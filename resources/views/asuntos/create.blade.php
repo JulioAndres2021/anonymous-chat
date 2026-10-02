@@ -10,22 +10,13 @@ anonymous@chat:~$ new-thread
 
 <div
     data-thread-suggestions
-    data-suggestions-url="{{
-        route('asuntos.sugerencias')
-    }}"
-    data-available-text="{{
-        __('messages.title_available')
-    }}"
-    data-exists-text="{{
-        __('messages.title_exists')
-    }}"
-    data-suggestions-text="{{
-        __('messages.suggestions')
-    }}"
-    data-selected-text="{{
-        __('messages.selected')
-    }}"
+    data-suggestions-url="{{ route('asuntos.sugerencias') }}"
+    data-available-text="{{ __('messages.title_available') }}"
+    data-exists-text="{{ __('messages.title_exists') }}"
+    data-suggestions-text="{{ __('messages.suggestions') }}"
+    data-selected-text="{{ __('messages.selected') }}"
 >
+
 <p>
     <span class="prompt">anonymous@chat:~$</span>
     <span class="command">create --anonymous</span>
@@ -43,11 +34,17 @@ anonymous@chat:~$ new-thread
 
 <div class="line"></div>
 
-<form action="{{ route('asuntos.store') }}" method="POST">
+<form
+    action="{{ route('asuntos.store') }}"
+    method="POST"
+>
     @csrf
 
     <div class="field">
-        <label for="titulo">{{ __('messages.subject') }}:</label>
+        <label for="titulo">
+            {{ __('messages.subject') }}:
+        </label>
+
         <input
             id="titulo"
             type="text"
@@ -56,11 +53,18 @@ anonymous@chat:~$ new-thread
             autocomplete="off"
             autofocus
         >
-        <div id="titulo-sugerencias" class="suggestion-box"></div>
+
+        <div
+            id="titulo-sugerencias"
+            class="suggestion-box"
+        ></div>
     </div>
 
     <div class="field">
-        <label for="password">{{ __('messages.password') }}:</label>
+        <label for="password">
+            {{ __('messages.password') }}:
+        </label>
+
         <input
             id="password"
             type="password"
@@ -70,7 +74,10 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="password_confirmation">{{ __('messages.repeat_password') }}:</label>
+        <label for="password_confirmation">
+            {{ __('messages.repeat_password') }}:
+        </label>
+
         <input
             id="password_confirmation"
             type="password"
@@ -80,7 +87,10 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="expira_at">{{ __('messages.expires_at') }}:</label>
+        <label for="expira_at">
+            {{ __('messages.expires_at') }}:
+        </label>
+
         <input
             id="expira_at"
             type="datetime-local"
@@ -90,16 +100,28 @@ anonymous@chat:~$ new-thread
     </div>
 
     <div class="field">
-        <label for="mensaje">{{ __('messages.message') }}:</label>
-        <textarea id="mensaje" name="mensaje" rows="9">{{ old('mensaje') }}</textarea>
+        <label for="mensaje">
+            {{ __('messages.message') }}:
+        </label>
+
+        <textarea
+            id="mensaje"
+            name="mensaje"
+            rows="9"
+        >{{ old('mensaje') }}</textarea>
     </div>
 
-    <button type="submit">./{{ __('messages.create') }}</button>
+    <button type="submit">
+        ./{{ __('messages.create') }}
+    </button>
 </form>
 
 <div class="line"></div>
 
-<a href="{{ route('asuntos.index') }}">← {{ __('messages.back') }}</a>
+<a href="{{ route('asuntos.index') }}">
+    ← {{ __('messages.back') }}
+</a>
+
+</div>
 
 @endsection
-
