@@ -12,7 +12,43 @@ use App\Http\Controllers\Admin\IntentoAccesoController as AdminIntentoAccesoCont
 use App\Http\Controllers\Admin\AdjuntoController as AdminAdjuntoController;
 
 Route::get('/', [AsuntoController::class, 'index'])->name('asuntos.index');
+Route::get('/debug-request-info', function (
+    \Illuminate\Http\Request $request
+) {
+    abort_unless(
+        app()->isProduction(),
+        404
+    );
 
+    return response()->json([
+        'ip_laravel' =>
+            $request->ip(),
+
+        'x_real_ip' =>
+            $request->header(
+                'X-Real-IP'
+            ),
+
+        'x_forwarded_for' =>
+            $request->header(
+                'X-Forwarded-For'
+            ),
+
+        'x_forwarded_proto' =>
+            $request->header(
+                'X-Forwarded-Proto'
+            ),
+
+        'is_secure' =>
+            $request->isSecure(),
+
+        'scheme' =>
+            $request->getScheme(),
+
+        'host' =>
+            $request->getHost(),
+    ]);
+});
 //Ruta para cambiar IDIOMAS
 Route::get(
     '/idioma/{locale}',
