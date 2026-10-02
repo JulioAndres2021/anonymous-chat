@@ -10,9 +10,8 @@ use Throwable;
 
 class PurgaArchivoService
 {
-    public function procesar(
-        PurgaArchivo $purga
-    ): bool {
+    public function procesar(PurgaArchivo $purga): bool 
+    {
         if ($purga->purgado_at) {
             return true;
         }

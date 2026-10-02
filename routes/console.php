@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('anonymous:expirar-asuntos')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('anonymous:purgar-archivos')
+    ->hourly()
+    ->withoutOverlapping();
