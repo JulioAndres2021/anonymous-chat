@@ -62,12 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response =
-                await fetch(url, {
-                    headers: {
-                        Accept:
-                            'application/json',
-                    },
-                });
+            await fetch(url, {
+                headers: {
+                    Accept:
+                        'application/json',
+
+                    'X-Requested-With':
+                        'XMLHttpRequest',
+                },
+            });
 
             if (!response.ok) {
                 throw new Error();

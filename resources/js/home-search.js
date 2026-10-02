@@ -100,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         Accept:
                             'application/json',
+
+                        'X-Requested-With':
+                            'XMLHttpRequest',
                     },
                 });
 

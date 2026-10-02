@@ -6,6 +6,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CrearAsuntoRequest extends FormRequest
 {
+
+    protected $redirectRoute = 'asuntos.create';
+    
     public function authorize(): bool
     {
         return true;
