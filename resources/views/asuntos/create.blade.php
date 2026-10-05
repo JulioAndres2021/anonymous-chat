@@ -37,6 +37,7 @@ anonymous@chat:~$ new-thread
 <form
     action="{{ route('asuntos.store') }}"
     method="POST"
+    enctype="multipart/form-data"
 >
     @csrf
 
@@ -109,6 +110,23 @@ anonymous@chat:~$ new-thread
             name="mensaje"
             rows="9"
         >{{ old('mensaje') }}</textarea>
+    </div>
+
+    <div class="field">
+        <label for="imagen">
+            {{ __('messages.attach_image') }}:
+        </label>
+
+        <input
+            id="imagen"
+            type="file"
+            name="imagen"
+            accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+        >
+
+        <p class="muted">
+            JPG, PNG, WEBP o GIF · máximo 5 MB
+        </p>
     </div>
 
     <button type="submit">

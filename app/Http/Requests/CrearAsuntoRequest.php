@@ -3,8 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\File;
 
 class CrearAsuntoRequest extends FormRequest
+
+
 {
 
     protected $redirectRoute = 'asuntos.create';
@@ -45,6 +48,14 @@ class CrearAsuntoRequest extends FormRequest
                 'min:1',
                 'max:10000',
             ],
+
+            'imagen' => [
+                'nullable',
+                File::image()
+                    ->types(['jpg', 'jpeg', 'png', 'webp', 'gif'])
+                    ->max('5mb'),
+            ],
+
         ];
     }
 
@@ -65,6 +76,8 @@ class CrearAsuntoRequest extends FormRequest
 
             'mensaje.required' => 'El mensaje es obligatorio.',
             'mensaje.max' => 'El mensaje no puede superar los 10.000 caracteres.',
+            'imagen.image' => 'El archivo adjunto debe ser una imagen válida.',
+            'imagen.max' => 'La imagen no puede superar los 5 MB.',
         ];
     }
 }

@@ -9,7 +9,7 @@ return [
     'ok' => 'OK',
     'error' => 'ERROR',
 
-    'home_title' => 'Sistema de conversaciones privadas sin registro de usuario.',
+    'home_title' => 'Sistema de conversaciones privadas sin registro de usuario manteniendo la privacidad.',
     'home_search_help' => 'Podés buscar un asunto existente y, si conocés su contraseña, acceder a la conversación.',
     'home_create_help' => 'También podés crear un nuevo asunto, definir una contraseña y una fecha de expiración, escribir mensajes y adjuntar imágenes.',
     'privacy_notice' => 'El sistema registra datos técnicos mínimos de seguridad, como IP, navegador y sistema operativo.',

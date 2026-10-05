@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
+
+
 class AdjuntoTest extends TestCase
 {
     use RefreshDatabase;
@@ -233,5 +235,78 @@ class AdjuntoTest extends TestCase
         );
 
         sodium_memzero($clave);
+    }
+
+    public function test_usuario_puede_crear_asunto_con_imagen_inicial(): void
+    {
+        Storage::fake('local');
+
+        $archivo =
+            UploadedFile::fake()
+                ->image(
+                    'foto.jpg',
+                    800,
+                    600
+                );
+
+        $response = $this->post(
+            route('asuntos.store'),
+            [
+                'titulo' =>
+                    'Asunto con imagen inicial',
+
+                'password' =>
+                    'password123',
+
+                'password_confirmation' =>
+                    'password123',
+
+                'expira_at' =>
+                    now()
+                        ->addDay()
+                        ->format('Y-m-d\TH:i'),
+
+                'mensaje' =>
+                    'Mensaje inicial con imagen',
+
+                'imagen' =>
+                    $archivo,
+            ]
+        );
+
+        $response->assertRedirect(
+            route('asuntos.index')
+        );
+
+        $asunto =
+            Asunto::where(
+                'titulo',
+                'Asunto con imagen inicial'
+            )
+            ->firstOrFail();
+
+        $mensaje =
+            $asunto
+                ->mensajes()
+                ->firstOrFail();
+
+        $adjunto =
+            $mensaje
+                ->adjuntos()
+                ->firstOrFail();
+
+        $this->assertSame(
+            'image/jpeg',
+            $adjunto->mime
+        );
+
+        $this->assertNotNull(
+            $adjunto->ruta
+        );
+
+        Storage::disk('local')
+            ->assertExists(
+                $adjunto->ruta
+            );
     }
 }

@@ -47,6 +47,7 @@
         .prompt { color: #00ff41; }
         .command { color: #fff; }
         .muted { color: #888; }
+        .muted-rojo { color: #a90505; }
         .success { color: #00ff41; }
         .error { color: #ff5f56; }
         .warning { color: #ffbd2e; }
@@ -182,51 +183,51 @@
         }
  
         .locale-switcher {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-}
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
 
-.inline-form {
-    display: inline;
-}
+        .inline-form {
+            display: inline;
+        }
 
-.logout-button {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #ff5f56;
-}
+        .logout-button {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #ff5f56;
+        }
 
-.logout-button:hover {
-    background: transparent;
-    color: #ff5f56;
-    text-decoration: underline;
-}
+        .logout-button:hover {
+            background: transparent;
+            color: #ff5f56;
+            text-decoration: underline;
+        }
 
-.lock-thread-form {
-    margin-bottom: 20px;
-}
+        .lock-thread-form {
+            margin-bottom: 20px;
+        }
 
-.attachment-link {
-    margin-top: 10px;
-}
+        .attachment-link {
+            margin-top: 10px;
+        }
 
-.suggestion-box {
-    margin-top: 10px;
-}
+        .suggestion-box {
+            margin-top: 10px;
+        }
 
-.suggestion-button {
-    margin-top: 6px;
-    margin-right: 6px;
-}
+        .suggestion-button {
+            margin-top: 6px;
+            margin-right: 6px;
+        }
 
-.stack-form {
-    margin-top: 10px;
-}
+        .stack-form {
+            margin-top: 10px;
+        }
 
-.checkbox-auto {
-    width: auto;
-}
+        .checkbox-auto {
+            width: auto;
+        }

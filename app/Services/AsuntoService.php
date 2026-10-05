@@ -10,90 +10,154 @@ use Illuminate\Support\Str;
 class AsuntoService
 {
     public function __construct(
-        private readonly CifradoConversacionService $cifradoService
+        private readonly CifradoConversacionService $cifradoService,
+        private readonly AdjuntoService $adjuntoService
     ) {
     }
 
-    public function crear(array $datos, array $cliente): Asunto
-    {
-        return DB::transaction(function () use ($datos) {
-
-            $claveConversacion =
-                $this->cifradoService->generarClaveConversacion();
-
-            $claveProtegida =
-                $this->cifradoService->protegerClaveConPassword(
-                    $claveConversacion,
-                    $datos['password']
-                );
-
-            $claveAdminCifrada =
-                $this->cifradoService
-                    ->protegerClaveParaAdmin(
-                        $claveConversacion
-            );
-
-
-            $asunto = Asunto::create([
-                'titulo' => trim($datos['titulo']),
-
-                'slug' => $this->generarSlugUnico(
-                    $datos['titulo']
-                ),
-
-                'password_hash' => Hash::make(
-                    $datos['password']
-                ),
-
-                'clave_password_cifrada' => $claveProtegida,
+    public function crear(
+        array $datos,
+        array $cliente
+    ): Asunto {
+        return DB::transaction(
+            function () use (
+                $datos,
+                $cliente
+            ) {
+                /*
+                 * 1. Generamos una clave única
+                 * para esta conversación.
+                 */
+                $claveConversacion =
+                    $this->cifradoService
+                        ->generarClaveConversacion();
 
                 /*
-                 * Más adelante la misma clave de conversación
-                 * también quedará protegida para el administrador.
+                 * 2. Protegemos la clave
+                 * con la contraseña del usuario.
                  */
-                'clave_admin_cifrada' => $claveAdminCifrada,
+                $claveProtegida =
+                    $this->cifradoService
+                        ->protegerClaveConPassword(
+                            $claveConversacion,
+                            $datos['password']
+                        );
 
-                'expira_at' => $datos['expira_at'],
-            ]);
+                /*
+                 * 3. Protegemos también la clave
+                 * para recuperación administrativa.
+                 */
+                $claveAdminCifrada =
+                    $this->cifradoService
+                        ->protegerClaveParaAdmin(
+                            $claveConversacion
+                        );
 
-            $contenidoCifrado =
-                $this->cifradoService->cifrarMensaje(
-                    $datos['mensaje'],
+                /*
+                 * 4. Primero creamos el asunto.
+                 */
+                $asunto = Asunto::create([
+                    'titulo' =>
+                        trim(
+                            $datos['titulo']
+                        ),
+
+                    'slug' =>
+                        $this->generarSlugUnico(
+                            $datos['titulo']
+                        ),
+
+                    'password_hash' =>
+                        Hash::make(
+                            $datos['password']
+                        ),
+
+                    'clave_password_cifrada' =>
+                        $claveProtegida,
+
+                    'clave_admin_cifrada' =>
+                        $claveAdminCifrada,
+
+                    'expira_at' =>
+                        $datos['expira_at'],
+                ]);
+
+                /*
+                 * 5. Ciframos el mensaje inicial.
+                 */
+                $contenidoCifrado =
+                    $this->cifradoService
+                        ->cifrarMensaje(
+                            $datos['mensaje'],
+                            $claveConversacion
+                        );
+
+                /*
+                 * 6. Creamos el mensaje inicial
+                 * asociado al asunto.
+                 */
+                $mensaje =
+                    $asunto
+                        ->mensajes()
+                        ->create([
+                            'contenido_cifrado' =>
+                                $contenidoCifrado,
+
+                            'ip_cifrada' =>
+                                $cliente[
+                                    'ip_cifrada'
+                                ] ?? null,
+
+                            'sistema_operativo' =>
+                                $cliente[
+                                    'sistema_operativo'
+                                ] ?? null,
+
+                            'navegador' =>
+                                $cliente[
+                                    'navegador'
+                                ] ?? null,
+
+                            'user_agent' =>
+                                $cliente[
+                                    'user_agent'
+                                ] ?? null,
+                        ]);
+
+                /*
+                 * 7. Si el usuario adjuntó
+                 * una imagen al crear el asunto,
+                 * la ciframos con la misma clave
+                 * de conversación.
+                 */
+                if (!empty($datos['imagen'])) {
+                    $this->adjuntoService
+                        ->guardarImagen(
+                            $datos['imagen'],
+                            $mensaje,
+                            $claveConversacion
+                        );
+                }
+
+                /*
+                 * 8. Limpiamos la clave
+                 * de memoria.
+                 */
+                sodium_memzero(
                     $claveConversacion
                 );
 
-            $asunto->mensajes()->create([
-                'contenido_cifrado' =>
-                    $contenidoCifrado,
-
-                'ip_cifrada' =>
-                    $cliente['ip_cifrada'] ?? null,
-
-                'sistema_operativo' =>
-                    $cliente['sistema_operativo'] ?? null,
-
-                'navegador' =>
-                    $cliente['navegador'] ?? null,
-
-                'user_agent' =>
-                    $cliente['user_agent'] ?? null,
-
-            ]);
-
-            sodium_memzero($claveConversacion);
-
-            return $asunto;
-        });
+                return $asunto;
+            }
+        );
     }
 
-    private function generarSlugUnico(string $titulo): string
-    {
-        $slugBase = Str::slug($titulo);
+    private function generarSlugUnico(
+        string $titulo
+    ): string {
+        $slugBase =
+            Str::slug($titulo);
 
-        /*
-         * Evitamos un slug vacío en títulos formados únicamente
-         * por caracteres que Str::slug no pueda representar.
-         */
         if ($slugBase === '') {
             $slugBase = 'asunto';
         }
@@ -103,10 +167,17 @@ class AsuntoService
 
         while (
             Asunto::withTrashed()
-                ->where('slug', $slug)
+                ->where(
+                    'slug',
+                    $slug
+                )
                 ->exists()
         ) {
-            $slug = $slugBase . '-' . $contador;
+            $slug =
+                $slugBase
+                . '-'
+                . $contador;
+
             $contador++;
         }
 

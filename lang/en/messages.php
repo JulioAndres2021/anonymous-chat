@@ -9,7 +9,7 @@ return [
     'ok' => 'OK',
     'error' => 'ERROR',
 
-    'home_title' => 'Private conversation system without user registration.',
+    'home_title' => 'Private conversation system that does not require user registration, maintaining privacy.',
     'home_search_help' => 'You can search for an existing thread and, if you know its password, access the conversation.',
     'home_create_help' => 'You can also create a new thread, define a password and expiration date, write messages and attach images.',
     'privacy_notice' => 'The system records minimal technical security data such as IP address, browser and operating system.',

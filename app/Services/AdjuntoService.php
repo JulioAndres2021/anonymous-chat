@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
+
 class AdjuntoService
 {
     public function guardarImagen(UploadedFile $archivo, Mensaje $mensaje, string $claveConversacion): Adjunto 
