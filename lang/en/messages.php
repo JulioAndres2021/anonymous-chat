@@ -56,7 +56,7 @@ return [
     'lock_thread' => 'LOCK THREAD',
     'chat_help' => 'You can read the conversation, reply or attach an image.',
     'chat_encryption_help' => 'Replies are stored encrypted inside this thread.',
-    'empty_conversation' => 'conversation.log is empty.',
+    'empty_conversation' => 'There are no messages in this conversation.',
     'reply' => 'reply',
     'attach_image' => 'attach_image',
     'image' => 'IMAGE',

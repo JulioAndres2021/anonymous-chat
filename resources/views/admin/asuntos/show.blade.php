@@ -40,7 +40,7 @@ root@anonymous-chat:/admin/asuntos/{{ $asunto->id }}#
 
 <p>
     <span class="prompt">root@anonymous-chat:/admin/asuntos/{{ $asunto->id }}#</span>
-    <span class="command">cat conversation.log</span>
+    <span class="command">decrypt --conversation</span>
 </p>
 
 @if ($errorDescifrado)

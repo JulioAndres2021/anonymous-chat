@@ -56,7 +56,7 @@ return [
     'lock_thread' => 'BLOQUEAR CONVERSACIÓN',
     'chat_help' => 'Podés leer la conversación, responder o adjuntar una imagen.',
     'chat_encryption_help' => 'Las respuestas se almacenan cifradas dentro de este asunto.',
-    'empty_conversation' => 'conversation.log está vacío.',
+    'empty_conversation' => 'No hay mensajes en la conversación.',
     'reply' => 'responder',
     'attach_image' => 'adjuntar_imagen',
     'image' => 'IMAGEN',

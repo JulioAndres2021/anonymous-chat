@@ -14,7 +14,7 @@ root@anonymous-chat:/admin/security#
 
 <p>
     <span class="prompt">root@anonymous-chat:/admin/security#</span>
-    <span class="command">cat failed_access.log</span>
+    <span class="command">show --failed-access</span>
 </p>
 
 <div class="line"></div>

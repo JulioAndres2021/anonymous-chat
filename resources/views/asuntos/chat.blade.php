@@ -10,7 +10,7 @@ anonymous@chat:~/{{ $asunto->slug }}$
 
 <p>
     <span class="prompt">anonymous@chat:~/{{ $asunto->slug }}$</span>
-    <span class="command">cat conversation.log</span>
+    <span class="command">decrypt --conversation</span>
 </p>
 
 <form
