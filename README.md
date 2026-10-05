@@ -38,6 +38,12 @@ acceso administrativo autorizado al contenido cifrado.
 -   Interfaz estilo terminal.
 -   Interfaz bilingüe Español / Inglés.
 -   Panel administrativo.
+-   Rate limiting en operaciones sensibles.
+-   Sesiones cifradas y cookies seguras en producción.
+-   Content Security Policy (CSP) y headers HTTP de seguridad.
+-   Expiración automática mediante scheduler.
+-   Papelera administrativa con restauración y eliminación definitiva.
+-   Purga programada de archivos pendientes.
 -   Suite automatizada de pruebas.
 
 ## Modelo de privacidad
@@ -71,6 +77,9 @@ recuperarse desde la base de datos.
 
 El proyecto fue desarrollado y probado localmente en Windows con Laragon
 y PHP 8.4.
+
+También fue desplegado y verificado en un entorno de producción Alwaysdata
+con PHP 8.4 y HTTPS.
 
 ## Requisitos
 
@@ -287,18 +296,49 @@ permitir recuperación administrativa mientras sigan disponibles.
 
 ## Scheduler
 
+El proyecto utiliza el scheduler de Laravel para automatizar tareas de
+mantenimiento.
+
+Programación actual:
+
+``` text
+Cada minuto  -> anonymous:expirar-asuntos
+Cada hora    -> anonymous:purgar-archivos
+```
+
 Desarrollo:
 
 ``` bash
 php artisan schedule:work
 ```
 
-Producción: configurar el scheduler de Laravel para ejecutar
-periódicamente:
+Para comprobar las tareas registradas:
+
+``` bash
+php artisan schedule:list
+```
+
+Para ejecutar manualmente las tareas que correspondan al momento actual:
 
 ``` bash
 php artisan schedule:run
 ```
+
+### Producción en Alwaysdata
+
+Alwaysdata ejecuta una única tarea programada cada minuto:
+
+``` bash
+cd /home/julioandres/anonymous-chat && php artisan schedule:run
+```
+
+Laravel decide internamente qué comandos deben ejecutarse según la
+programación definida en `routes/console.php`.
+
+Se verificó en producción el ciclo completo de expiración: un asunto
+vencido desaparece del listado público, pasa automáticamente a la papelera
+administrativa y posteriormente puede restaurarse o eliminarse
+definitivamente.
 
 ## Administración
 
@@ -307,7 +347,12 @@ administración utiliza la tabla `users` de Laravel.
 
 El panel permite consultar estadísticas, asuntos, mensajes mediante
 recuperación administrativa, adjuntos, intentos fallidos y papelera,
-además de restaurar asuntos y cerrar sesión.
+además de restaurar asuntos, eliminar definitivamente elementos de la
+papelera y cerrar sesión.
+
+La eliminación definitiva registra y procesa la purga de archivos
+cifrados asociados. El comando `anonymous:purgar-archivos` permite
+reintentar las purgas pendientes de forma programada.
 
 Al cerrar sesión administrativa se vuelve a la página principal pública.
 
@@ -346,6 +391,14 @@ listado original.
 
 Al crear un asunto se comprueba si el título existe y se ofrecen
 alternativas. La comprobación incluye asuntos eliminados lógicamente.
+
+Las consultas dinámicas se realizan mediante `fetch` y se identifican
+como peticiones AJAX con `X-Requested-With: XMLHttpRequest`.
+
+Si la validación del formulario de creación falla, la aplicación vuelve
+explícitamente a `/crear`, evitando que una petición AJAX de sugerencias
+pueda convertirse accidentalmente en el destino del redirect de
+validación.
 
 ## Rutas públicas principales
 
@@ -434,9 +487,13 @@ respuestas protegidas.
 
 ``` bash
 php artisan optimize:clear
+php artisan optimize
 php artisan route:list
 php artisan test
 php artisan anonymous:expirar-asuntos
+php artisan anonymous:purgar-archivos
+php artisan schedule:list
+php artisan schedule:run
 php artisan schedule:work
 ```
 
@@ -450,27 +507,132 @@ C:\laragon\www\anonymous-chat
 
 Configurar `.env`, instalar dependencias y migrar antes de ejecutar.
 
-## Antes de producción
+## Producción y hardening
 
-Realizar una fase específica de hardening:
+El proyecto fue desplegado y verificado en Alwaysdata utilizando PHP 8.4,
+Composer, MySQL/MariaDB, HTTPS y un Document Root apuntando al directorio
+`public/` de Laravel.
 
--   `APP_ENV=production`;
--   `APP_DEBUG=false`;
--   HTTPS obligatorio;
--   cookies y sesiones seguras;
--   rate limiting adicional;
--   headers HTTP de seguridad;
--   revisión de Content Security Policy;
--   límites y validación de archivos;
--   permisos de `storage/`;
--   protección y respaldo de claves;
--   credenciales administrativas nuevas;
--   scheduler;
--   backups;
--   política de retención y eliminación física;
--   logging sin secretos;
--   manejo de errores sin información interna;
--   pruebas con el motor de base de datos de producción.
+Configuración esencial de producción:
+
+``` env
+APP_ENV=production
+APP_DEBUG=false
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=60
+SESSION_ENCRYPT=true
+SESSION_PATH=/
+SESSION_DOMAIN=null
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+
+IP_HASH_KEY=
+ANONYMOUS_ADMIN_KEY=
+```
+
+Los valores reales de las claves nunca deben incluirse en el repositorio
+ni en documentación pública.
+
+Después de modificar variables de entorno o configuración:
+
+``` bash
+php artisan optimize:clear
+php artisan optimize
+```
+
+### Headers de seguridad
+
+En producción se verificaron:
+
+-   `Content-Security-Policy`;
+-   `Strict-Transport-Security`;
+-   `X-Content-Type-Options: nosniff`;
+-   `X-Frame-Options: DENY`;
+-   `Referrer-Policy: no-referrer`;
+-   `Permissions-Policy` restringiendo cámara, micrófono y geolocalización.
+
+La CSP utiliza recursos propios (`'self'`) y no depende de
+`unsafe-inline` para scripts o estilos.
+
+### Sesiones y cookies
+
+Las sesiones se almacenan en base de datos y su contenido persistido se
+cifra mediante Laravel.
+
+En producción las cookies se verificaron con `Secure`, `HttpOnly` y
+`SameSite=Lax`.
+
+### Rate limiting
+
+Las operaciones sensibles utilizan limitadores independientes para
+búsqueda, sugerencias, creación, desbloqueo, mensajes, login administrativo
+y acceso a adjuntos.
+
+### Validación de adjuntos
+
+Las imágenes permitidas son JPG/JPEG, PNG, WEBP y GIF, con un límite de
+5 MB. Además de la validación de Laravel, el servicio comprueba MIME,
+tamaño y que el archivo pueda interpretarse realmente como una imagen.
+
+Los adjuntos cifrados permanecen en almacenamiento privado y no se
+publican mediante `storage:link`.
+
+### Claves criptográficas de producción
+
+`IP_HASH_KEY` y `ANONYMOUS_ADMIN_KEY` deben generarse por separado:
+
+``` bash
+php -r "echo base64_encode(random_bytes(32)), PHP_EOL;"
+```
+
+Nunca reutilizar una clave para ambas funciones. `ANONYMOUS_ADMIN_KEY`
+debe conservarse también en un lugar seguro fuera del servidor.
+
+## Despliegue en Alwaysdata
+
+El despliegue probado utiliza PHP 8.4, Laravel 13, Composer, Node.js/npm
+para Vite, MySQL/MariaDB, HTTPS y el scheduler de Alwaysdata.
+
+El sitio debe apuntar a:
+
+``` text
+/home/<usuario>/anonymous-chat/public
+```
+
+Instalación inicial de producción:
+
+``` bash
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci
+npm run build
+php artisan migrate --force
+php artisan optimize
+```
+
+Una vez compilados los assets, `node_modules` puede eliminarse:
+
+``` bash
+rm -rf node_modules
+```
+
+### Actualizar producción desde GitHub
+
+``` bash
+cd ~/anonymous-chat
+git pull
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci
+npm run build
+rm -rf node_modules
+php artisan migrate --force
+php artisan optimize:clear
+php artisan optimize
+```
+
+Antes de cambios importantes se recomienda disponer de un backup
+verificable. No sobrescribir el `.env` de producción con el de desarrollo.
 
 ## Consideraciones de seguridad
 
@@ -498,15 +660,33 @@ Adjuntos cifrados
         ↓
 LOCK THREAD
         ↓
-Expiración / Soft Delete
+Expiración automática / Soft Delete
+        ↓
+Papelera administrativa
+        ↓
+Restauración o eliminación definitiva
+        ↓
+Purga programada de archivos
         ↓
 Administración y recuperación autorizada
 ```
 
+El proyecto se encuentra desplegado en producción sobre Alwaysdata.
+
+Se verificaron en producción la creación y acceso a asuntos, HTTPS, CSP y
+headers de seguridad, cookies seguras, sesiones cifradas, claves
+criptográficas requeridas, scheduler, expiración automática, papelera,
+restauración, eliminación definitiva, búsqueda y sugerencias AJAX y
+redirects correctos ante errores de validación.
+
 ## Próxima etapa
 
-Hardening para producción: rate limiting, headers, sesiones, entorno,
-adjuntos, backups y retención.
+-   verificar de punta a punta imágenes cifradas en producción;
+-   confirmar los reintentos periódicos de `anonymous:purgar-archivos`;
+-   verificar físicamente la eliminación de archivos `.enc`;
+-   definir y probar una estrategia de backup y restauración;
+-   revisar periódicamente logs y espacio de almacenamiento;
+-   mantener probado el procedimiento de actualización de producción.
 
 ------------------------------------------------------------------------
 
